@@ -3,7 +3,19 @@
 
 /* Central de Futebol 1.4 - interface mobile-first e estatísticas por competição */
 :root{font-family:Inter,system-ui,-apple-system,Arial,sans-serif;color-scheme:dark;background:#0d121c;color:#f4f7ff}body{background:#0d121c;color:#f4f7ff;padding-bottom:82px}header{background:#121a29;border-bottom:1px solid #263246;padding:18px 16px 15px;position:relative}header h1{font-size:21px;letter-spacing:-.6px}header small{display:block;margin-top:5px;color:#9daac0;font-size:12px}header .brand{display:flex;align-items:center;gap:11px}header .brandmark{width:42px;height:42px;border-radius:13px;background:#2465df;display:grid;place-items:center;font-size:24px}header .version{margin-left:auto;font-size:11px;color:#a9c5ff;background:#1c3157;border-radius:30px;padding:5px 8px}nav#nav{background:#121a29;border-bottom:1px solid #263246;position:static;padding:10px 12px;gap:7px;scrollbar-width:none}nav#nav::-webkit-scrollbar{display:none}nav#nav button{flex:0 0 auto;white-space:nowrap;border:1px solid #2a354b;background:#1b2536;color:#b9c7dc;border-radius:18px;font-size:12px;padding:8px 12px}nav#nav button.active{background:#2867e7;border-color:#2867e7;color:white}main{max-width:1050px;padding:14px 12px 28px}.panel{background:#161f2e;border:1px solid #29354a;border-radius:17px;padding:17px;margin:12px 0;box-shadow:0 5px 24px #080e1818}.panel h2{font-size:19px;letter-spacing:-.3px}.panel h3{font-size:16px}.muted,small{color:#a4b1c5}button,.btn{background:#253650;border:1px solid #344765;border-radius:10px;color:#f2f6ff;padding:10px 13px}button.primary,.primary,button.active{background:#2466e9;color:#fff;border-color:#2466e9}button.danger{background:#60323b;border-color:#7b3b48}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #68a4ff;outline-offset:2px}input,select,textarea{background:#0e1725;border:1px solid #35435b;border-radius:10px;color:#f4f7ff;min-height:42px}label{color:#c5d1e3}.item{border-bottom:1px solid #2a3549;padding:13px 0}.pill{background:#243650;color:#cfe1ff}.score{color:#f7faff;font-size:30px}.notice{background:#3d3326;color:#ffe4ac}.lineup-player{border-color:#2b3a52}th,td{border-bottom-color:#2a3850}th{color:#b5c7e3}a{color:#83afff}.dashboard-hero{border-radius:20px;background:linear-gradient(135deg,#1c4699,#173365 65%,#132743);padding:20px;margin:6px 0 15px;border:1px solid #3868bc}.dashboard-hero h2{font-size:24px;margin:4px 0}.dashboard-hero p{color:#d2e1ff;font-size:13px;margin:0 0 15px}.dashboard-hero button{background:white;color:#17458d;border:0;font-weight:750}.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kpi{background:#161f2e;border:1px solid #29354a;border-radius:15px;padding:14px}.kpi .num{font-size:27px;font-weight:800;margin-top:5px}.kpi small{font-size:12px}.section-heading{display:flex;justify-content:space-between;align-items:center;margin:19px 0 9px}.section-heading h2{font-size:18px;margin:0}.match-card{display:flex;align-items:center;justify-content:space-between;gap:9px;border:1px solid #2c3b53;background:#161f2e;border-radius:15px;padding:14px;margin:9px 0}.match-card .teams{min-width:0;flex:1}.match-card .teams b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.match-card .meta{font-size:11px;color:#9dacc3;margin-top:7px}.match-card .result{font-size:22px;font-weight:850;white-space:nowrap}.match-card button{font-size:12px;padding:8px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#141e2e;border-top:1px solid #2d3c53;display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(5px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left));box-shadow:0 -8px 22px #0005}.bottom-nav button{border:0;background:transparent;color:#9eacc4;display:flex;flex-direction:column;gap:3px;align-items:center;font-size:10px;padding:4px 1px;border-radius:9px;min-width:0}.bottom-nav button .ico{font-size:20px}.bottom-nav button.selected{color:#72a5ff;background:#1a2a45}.update-banner{background:#244a86;color:white;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}.update-banner button{background:#fff;color:#153d81;padding:7px 10px;border:0}.hide{display:none!important}@media(min-width:760px){body{padding-bottom:0}.bottom-nav{position:static;max-width:1050px;margin:auto;border:1px solid #2d3c53;border-radius:14px}.kpi-grid{grid-template-columns:repeat(4,1fr)}main{padding:20px}.dashboard-hero{padding:27px}}@media print{header,nav,.bottom-nav,.update-banner,button{display:none!important}body{background:white;color:black;padding:0}.panel{background:white;color:black;border-color:#ddd}.muted,small{color:#444}}
-</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.4</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+
+/* v1.5: escudos dos clubes */
+.club-crest15{width:34px;height:34px;flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid #3b5373;background:#111c2c;overflow:hidden;vertical-align:middle;margin-right:7px}
+.club-crest15 img{display:block;width:100%;height:100%;object-fit:contain}
+.club-crest15.small{width:24px;height:24px;margin-right:5px}
+.club-crest15.large{width:54px;height:54px;margin-right:12px}
+.club-line15{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.club-line15 .club-crest15{margin:0}
+.club-logo-actions15{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.club-logo-actions15 label{margin:0;cursor:pointer}
+.club-logo-actions15 input{display:none}
+.club-logo-help15{font-size:12px;color:#a4b1c5}
+</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.5</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup})[tab]();}
@@ -89,7 +101,81 @@ function savePlayerStats14(e){e.preventDefault();const p=db.players.find(x=>x.id
 const playersBefore14=players;players=function(){return playersBefore14().replace(/(<button class="primary" onclick="startEdit\('players','([^']+)'\)">✏️ Editar cadastro<\/button>)/g,(_all,btn,pid)=>btn+` <button onclick="choosePlayerStats14('${pid}')">📊 Editar estatísticas</button>`)};
 const statsBefore14=stats;stats=function(){const compSelect=`<div class="panel"><h2>📊 Estatísticas por competição</h2><label>Competição<select id="statsComp14" onchange="render()"><option value="all">Todas</option>${db.competitions.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} (${esc(statSeason14(c))})</option>`).join('')}</select></label></div>`;const cid=window.statsFilter14||'all';const selected=db.competitions.find(c=>c.id===cid);const rows=db.players.map(p=>{const a=cid==='all'?allStatRows14(p).reduce((o,r)=>{for(const [k] of statFields14)o[k]+=r[k];return o},{goals:0,assists:0,yellow:0,red:0,games:0}):totalStats14(p,cid,statSeason14(selected));return {p,...a}}).sort((a,b)=>b.goals-a.goals||b.assists-a.assists);const table=`<div class="panel"><h2>Artilharia e estatísticas</h2><div class="scroll"><table><tr><th>Atleta</th><th>Gols</th><th>Assist.</th><th>🟨</th><th>🟥</th><th>Jogos</th></tr>${rows.map(r=>`<tr><td>${esc(r.p.name)}</td><td>${r.goals}</td><td>${r.assists}</td><td>${r.yellow}</td><td>${r.red}</td><td>${r.games}</td></tr>`).join('')}</table></div></div>`;const original=statsBefore14();const classification=original.slice(0,original.indexOf('<div class="panel"><h2>Estatísticas dos jogadores'));return classification+`<div class="panel"><h2>Filtrar estatísticas</h2><label>Competição<select onchange="window.statsFilter14=this.value;render()"><option value="all">Todas as competições</option>${db.competitions.map(c=>`<option value="${esc(c.id)}" ${cid===c.id?'selected':''}>${esc(c.name)} (${esc(statSeason14(c))})</option>`).join('')}</select></label></div>`+table};
 const renderBefore14=render;render=function(){if(tab==='playerstats14'){$('nav').innerHTML=tabs.map(([k,v])=>`<button onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=playerStatsPage14();renderBottom13()}else renderBefore14()};
-const backupBefore14=backup;backup=function(){return backupBefore14().replace('Versão 1.4','Versão 1.4')};
+const backupBefore14=backup;backup=function(){return backupBefore14().replace('Versão 1.4','Versão 1.5')};
+render();
+
+
+/* Central de Futebol v1.5: escudos persistidos no mesmo banco e incluídos no backup JSON. */
+function crest15(teamId, size='small'){
+ const team=db.teams.find(t=>t.id===teamId);
+ if(!team)return '';
+ const image=typeof team.crest==='string'&&/^data:image\/(png|jpeg|webp);base64,/i.test(team.crest)?team.crest:'';
+ return `<span class="club-crest15 ${size}" aria-hidden="true">${image?`<img src="${image}" alt="">`:'🛡️'}</span>`;
+}
+async function uploadCrest15(ev,teamId){
+ const file=ev.target.files?.[0];if(!file)return;
+ const team=db.teams.find(t=>t.id===teamId);if(!team)return;
+ if(!file.type.startsWith('image/'))return alert('Escolha uma imagem da galeria.');
+ if(file.size>12*1024*1024)return alert('A imagem é muito grande (limite: 12 MB).');
+ try{
+  const bitmap=await createImageBitmap(file);
+  const max=200,ratio=Math.min(1,max/bitmap.width,max/bitmap.height);
+  const w=Math.max(1,Math.round(bitmap.width*ratio)),h=Math.max(1,Math.round(bitmap.height*ratio));
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  canvas.getContext('2d').drawImage(bitmap,0,0,w,h);bitmap.close?.();
+  const data=canvas.toDataURL('image/png');
+  const previous=team.crest;team.crest=data;
+  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(err){team.crest=previous;return alert('Espaço insuficiente no navegador. Exporte um backup e tente uma imagem menor.');}
+  render();
+ }catch(err){alert('Não foi possível processar esta imagem. Tente outra foto em PNG ou JPG.');}
+}
+function removeCrest15(teamId){
+ const team=db.teams.find(t=>t.id===teamId);if(!team?.crest)return;
+ if(!confirm('Remover o escudo deste clube?'))return;
+ const previous=team.crest;delete team.crest;
+ try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){team.crest=previous;return alert('Erro ao salvar.');}
+ render();
+}
+const teamsBefore15=teams;
+teams=function(){
+ const base=teamsBefore15();
+ return base.replace(/<div class="item"><b>(.*?)<\/b> <small>(.*?)<\/small><div class="actions">(.*?)<\/div><\/div>/g,(full,n,loc,actions)=>{
+  const team=db.teams.find(t=>esc(t.name)===n);
+  if(!team)return full;
+  return `<div class="item"><div class="club-line15">${crest15(team.id,'large')}<div><b>${n}</b><div class="muted">${loc}</div></div></div><div class="club-logo-actions15"><label class="btn">📷 ${team.crest?'Trocar escudo':'Adicionar escudo'}<input type="file" accept="image/png,image/jpeg,image/webp,image/*" onchange="uploadCrest15(event,'${team.id}')"></label>${team.crest?`<button type="button" onclick="removeCrest15('${team.id}')">Remover escudo</button>`:''}</div><div class="actions">${actions}</div></div>`;
+ });
+};
+// Adiciona escudos aos nomes dos clubes em partidas, rodadas, súmulas e classificação,
+// sem alterar valores dos formulários ou a lógica de cálculo das estatísticas.
+function decorateCrests15(){
+ const root=$('app');if(!root)return;
+ const candidates=[...root.querySelectorAll('b, td, .score, .match-card .teams b, h3')];
+ const names=db.teams.filter(t=>t.name&&t.crest).sort((a,b)=>b.name.length-a.name.length);
+ if(!names.length)return;
+ for(const el of candidates){
+  if(el.closest('.club-line15')||el.closest('button')||el.querySelector('.club-crest15'))continue;
+  const nodes=[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE);
+  for(const node of nodes){
+   const raw=node.textContent;
+   const matches=[];
+   for(const t of names){let at=raw.indexOf(t.name);while(at!==-1){
+    if(!matches.some(m=>at<m.end&&at+t.name.length>m.start))matches.push({start:at,end:at+t.name.length,t});
+    at=raw.indexOf(t.name,at+t.name.length);
+   }}
+   if(!matches.length)continue;
+   matches.sort((a,b)=>a.start-b.start);
+   const fragment=document.createDocumentFragment();let pos=0;
+   for(const m of matches){if(m.start<pos)continue;
+    fragment.append(document.createTextNode(raw.slice(pos,m.start)));
+    const holder=document.createElement('span');holder.innerHTML=crest15(m.t.id,'small');
+    fragment.append(holder.firstElementChild);fragment.append(document.createTextNode(raw.slice(m.start,m.end)));pos=m.end;
+   }
+   fragment.append(document.createTextNode(raw.slice(pos)));node.replaceWith(fragment);
+  }
+ }
+}
+const renderBefore15=render;
+render=function(){renderBefore15();decorateCrests15()};
 render();
 
 </script></body></html>
