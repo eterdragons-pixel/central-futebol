@@ -404,4 +404,58 @@ backup=function(){return backupBefore19().replace('Versão 1.8','Versão 1.9')};
 document.querySelector('header .version').textContent='v1.9';
 render();
 
+
+/* v2.0: placar manual independente dos eventos; notas editáveis pelo perfil estatístico. */
+const eventScore20=score;
+score=function(m){
+ if(m?.manualScore20&&Number.isInteger(m.manualScore20.home)&&Number.isInteger(m.manualScore20.away))return [m.manualScore20.home,m.manualScore20.away];
+ return eventScore20(m);
+};
+function manualScorePanel20(m){
+ const [h,a]=score(m),manual=!!m.manualScore20;
+ return `<div class="panel"><h2>⚽ Editar placar diretamente</h2><p class="muted">Altere o resultado sem informar autor ou minuto dos gols. Os eventos já registrados permanecem intactos. O resultado manual vale para súmula, rodadas e classificação.</p><form onsubmit="saveManualScore20(event,'${m.id}')"><div class="grid"><label>${esc(name('teams',m.homeId))}<input name="home" type="number" min="0" step="1" required value="${h}"></label><label>${esc(name('teams',m.awayId))}<input name="away" type="number" min="0" step="1" required value="${a}"></label></div><div class="actions"><button class="primary">💾 Salvar placar</button>${manual?`<button type="button" onclick="clearManualScore20('${m.id}')">Voltar ao placar dos eventos</button>`:''}</div></form><small>${manual?'Resultado manual ativo.':'Resultado calculado pelos eventos da partida.'}</small></div>`;
+}
+function saveManualScore20(e,mid){
+ e.preventDefault();const m=db.matches.find(x=>x.id===mid);if(!m)return;
+ const f=new FormData(e.target),h=Number(f.get('home')),a=Number(f.get('away'));
+ if(!Number.isSafeInteger(h)||!Number.isSafeInteger(a)||h<0||a<0||h>999||a>999)return alert('Informe placares inteiros entre 0 e 999.');
+ m.manualScore20={home:h,away:a};save();render();alert('Placar atualizado!');
+}
+function clearManualScore20(mid){const m=db.matches.find(x=>x.id===mid);if(!m||!confirm('Voltar a calcular o placar pelos gols registrados?'))return;delete m.manualScore20;save();render()}
+const reportBefore20=report;
+report=function(){const m=db.matches.find(x=>x.id===selectedMatch);return reportBefore20()+(m?manualScorePanel20(m):'')};
+function ratingEditor20(p){
+ const comp=db.competitions.find(c=>c.id===selectedComp14);
+ const season=selectedSeason14||statSeason14(comp);
+ const relevant=db.matches.filter(m=>m.competitionId===selectedComp14&&statSeason14(comp)===season&&(
+ m.homeId===p.teamId||m.awayId===p.teamId||m.playerRatings?.[p.id]!==undefined||
+ (m.lineups&&Object.values(m.lineups).some(a=>Array.isArray(a)&&a.includes(p.id)))||
+ (m.events||[]).some(e=>e.playerId===p.id||e.secondaryId===p.id)
+ )).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ const values=relevant.map(m=>ratingValue16(m,p.id)).filter(v=>v!==null&&Number.isFinite(v));
+ const avg=values.length?ratingFmt16(values.reduce((a,b)=>a+b,0)/values.length):'Sem notas';
+ return `<div class="panel"><h2>⭐ Notas nas estatísticas manuais</h2><p class="muted">Média das avaliações nesta competição e temporada: <b>${esc(avg)}</b>. Edite a nota de cada partida aqui, sem precisar abrir a súmula. Use 0 a 10, com até uma casa decimal; deixe em branco para remover.</p>${relevant.length?`<form onsubmit="saveRatingsFromStats20(event,'${p.id}')"><input type="hidden" name="competition" value="${esc(selectedComp14)}"><input type="hidden" name="season" value="${esc(season)}">${relevant.map(m=>{const v=ratingValue16(m,p.id);return `<label>${esc(m.date||'Sem data')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))}<input name="rating_${esc(m.id)}" inputmode="decimal" placeholder="Sem nota" value="${v===null?'':esc(String(v).replace('.',','))}"></label>`}).join('')}<button class="primary">💾 Salvar notas do jogador</button></form>`:'<p class="muted">Nenhuma partida encontrada nesta competição e temporada para este jogador.</p>'}</div>`;
+}
+function saveRatingsFromStats20(e,pid){
+ e.preventDefault();const f=new FormData(e.target),cid=f.get('competition'),season=f.get('season');
+ const p=db.players.find(x=>x.id===pid);if(!p)return;
+ const changes=[];
+ for(const [key,val] of f.entries()){
+  if(!key.startsWith('rating_'))continue;
+  const mid=key.slice(7),m=db.matches.find(x=>x.id===mid);
+  if(!m||m.competitionId!==cid||statSeason14(db.competitions.find(c=>c.id===cid))!==season)continue;
+  const raw=String(val).trim().replace(',','.');
+  if(raw!==''&&(!/^(?:10(?:\.0)?|[0-9](?:\.[0-9])?)$/.test(raw)))return alert('Nota inválida. Use 0 a 10 com até uma casa decimal.');
+  changes.push([m,raw]);
+ }
+ for(const [m,raw] of changes){m.playerRatings??={};if(raw==='')delete m.playerRatings[pid];else m.playerRatings[pid]=Number(raw)}
+ save();render();alert('Notas atualizadas!');
+}
+const playerStatsBefore20=playerStatsPage14;
+playerStatsPage14=function(){const p=db.players.find(x=>x.id===selectedPlayer14);return playerStatsBefore20()+(p?ratingEditor20(p):'')};
+const backupBefore20=backup;
+backup=function(){return backupBefore20().replace('Versão 1.9','Versão 2.0')};
+document.querySelector('header .version').textContent='v2.0';
+render();
+
 </script></body></html>
