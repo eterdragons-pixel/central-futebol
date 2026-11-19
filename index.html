@@ -22,7 +22,7 @@
 .stats19 input{text-align:center;margin:0;min-width:0}
 .stats19 b{text-align:center;font-size:13px}
 </style>
-<style>.profile-link21{background:transparent;border:0;color:inherit;font-weight:800;font-size:1rem;text-align:left;padding:4px 0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer}</style><style>.competition22{border:1px solid #39465b;border-radius:10px;padding:12px;margin:12px 0}.competition22 summary{cursor:pointer;padding:5px}.competition22 .kpi-grid{margin:12px 0}.competition22 table{width:100%}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+<style>.profile-link21{background:transparent;border:0;color:inherit;font-weight:800;font-size:1rem;text-align:left;padding:4px 0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer}</style><style>.competition22{border:1px solid #39465b;border-radius:10px;padding:12px;margin:12px 0}.competition22 summary{cursor:pointer;padding:5px}.competition22 .kpi-grid{margin:12px 0}.competition22 table{width:100%}</style><style id="tabs25">.match-tabs25{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:thin}.match-tabs25 button{flex:0 0 auto;white-space:nowrap;border-radius:12px;padding:10px 14px}.match-tabs25 button.selected{background:#236b4b;color:white;border-color:#47a978}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -636,6 +636,30 @@ function addDemoClubs24(){
 const homeBefore24=home;
 home=function(){return homeBefore24()+`<div class="panel"><h2>⚽ Clubes de demonstração</h2><p>Adicione Atlético Aurora e União Estrela, com 11 jogadores fictícios em cada elenco, técnicos, capitães e formação 4-3-3. Seus clubes e partidas atuais não serão alterados.</p><button class="primary" onclick="addDemoClubs24()">➕ Adicionar 2 clubes de exemplo</button></div>`};
 document.querySelector('header .version').textContent='v2.4';
+render();
+
+
+/* v2.5: partidas organizadas por competição em abas. */
+let matchCompetition25='all';
+function chooseMatchCompetition25(cid){matchCompetition25=cid;render()}
+const matchesBefore25=matches;
+matches=function(){
+ const original=matchesBefore25();
+ const marker='<div class="panel"><h2>Partidas</h2>';
+ const pos=original.indexOf(marker);
+ if(pos<0)return original;
+ const all=db.matches;
+ const ids=new Set(db.competitions.map(c=>c.id));
+ if(matchCompetition25!=='all'&&matchCompetition25!=='unassigned'&&!ids.has(matchCompetition25))matchCompetition25='all';
+ const competitions=db.competitions.filter(c=>all.some(m=>m.competitionId===c.id));
+ const unknown=all.some(m=>!m.competitionId||!ids.has(m.competitionId));
+ const tabs=[{id:'all',name:'Todas',count:all.length},...competitions.map(c=>({id:c.id,name:c.name,count:all.filter(m=>m.competitionId===c.id).length})),...(unknown?[{id:'unassigned',name:'Sem competição',count:all.filter(m=>!m.competitionId||!ids.has(m.competitionId)).length}]:[])];
+ const filtered=all.filter(m=>matchCompetition25==='all'||(matchCompetition25==='unassigned'?(!m.competitionId||!ids.has(m.competitionId)):m.competitionId===matchCompetition25))
+ .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||(Number(a.round)||0)-(Number(b.round)||0));
+ const cards=filtered.map(m=>{const [h,a]=score(m);return `<div class="item"><b>${esc(name('teams',m.homeId))} ${h} × ${a} ${esc(name('teams',m.awayId))}</b><p class="muted">${esc(m.date||'Data a definir')} · Rodada ${esc(m.round||'?')} · ${esc(name('competitions',m.competitionId))} · ${m.status==='finished'?'Finalizada':m.status==='live'?'Em andamento':'Agendada'}</p><div class="actions"><button class="primary" onclick="selectedMatch='${m.id}';tab='report';render()">Abrir súmula</button>${buttons('matches',m)}</div></div>`}).join('');
+ return original.slice(0,pos)+`<div class="panel"><h2>🏆 Partidas por competição</h2><p class="muted">Escolha uma competição para consultar apenas seus confrontos. A aba Todas mostra o calendário completo.</p><div class="match-tabs25">${tabs.map(c=>`<button type="button" class="${matchCompetition25===c.id?'selected':''}" onclick="chooseMatchCompetition25('${c.id}')">${esc(c.name)} <small>(${c.count})</small></button>`).join('')}</div></div><div class="panel"><h2>${esc(tabs.find(c=>c.id===matchCompetition25)?.name||'Partidas')} · ${filtered.length} partidas</h2>${cards||'<p class="muted">Nenhuma partida nesta competição.</p>'}</div>`;
+};
+document.querySelector('header .version').textContent='v2.5';
 render();
 
 </script></body></html>
