@@ -662,4 +662,97 @@ matches=function(){
 document.querySelector('header .version').textContent='v2.5';
 render();
 
+
+/* v2.6 - classificações por competição, grupos e fases eliminatórias. */
+let compView26='';
+const stages26=['Fase de grupos','Oitavas de final','Quartas de final','Semifinal','Final','Disputa de 3º lugar','Mata-mata','Outra fase'];
+function comp26(){return db.competitions.find(c=>c.id===(compView26||selectedCompetition))||db.competitions[0]}
+function selectComp26(id){compView26=id;selectedCompetition=id;render()}
+function groupList26(c){return Array.isArray(c?.groups26)?c.groups26:[]}
+function groupForTeam26(c,tid){return groupList26(c).find(g=>g.teamIds.includes(tid))}
+function matchGroup26(m,c){return m.group26||((m.stage26==='Fase de grupos'||!m.stage26)?(groupForTeam26(c,m.homeId)?.id===groupForTeam26(c,m.awayId)?.id?groupForTeam26(c,m.homeId)?.id:null):null)}
+function standings26(cid,groupId){
+ const c=db.competitions.find(x=>x.id===cid);if(!c)return [];
+ const ms=db.matches.filter(m=>m.competitionId===cid&&m.status==='finished'&&(!groupId||matchGroup26(m,c)===groupId)&&(!m.stage26||m.stage26==='Fase de grupos'));
+ const teams=groupId?groupList26(c).find(g=>g.id===groupId)?.teamIds||[]:[...new Set(db.matches.filter(m=>m.competitionId===cid&&(!m.stage26||m.stage26==='Fase de grupos')).flatMap(m=>[m.homeId,m.awayId]))];
+ return teams.map(tid=>{const t=db.teams.find(x=>x.id===tid);if(!t)return null;
+ const r={team:t,pts:0,p:0,w:0,d:0,l:0,gf:0,ga:0};
+ for(const m of ms){if(m.homeId!==tid&&m.awayId!==tid)continue;const [h,a]=score(m),gf=m.homeId===tid?h:a,ga=m.homeId===tid?a:h;
+ r.p++;r.gf+=gf;r.ga+=ga;if(gf>ga){r.w++;r.pts+=3}else if(gf===ga){r.d++;r.pts++}else r.l++}
+ return r}).filter(Boolean).sort((a,b)=>b.pts-a.pts||((b.gf-b.ga)-(a.gf-a.ga))||b.gf-a.gf||a.team.name.localeCompare(b.team.name,'pt-BR'));
+}
+function table26(rows){
+ return `<div class="scroll"><table><thead><tr><th>#</th><th>Clube</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.team.name)}</td><td><b>${r.pts}</b></td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga}</td></tr>`).join('')}</tbody></table></div>${rows.length?'':'<p class="muted">Sem equipes nesta tabela.</p>'}`;
+}
+function compTables26(c){
+ const groups=groupList26(c);
+ const knockout=db.matches.filter(m=>m.competitionId===c.id&&m.stage26&&m.stage26!=='Fase de grupos');
+ const phases=[...new Set(knockout.map(m=>m.stage26))];
+ return `<div class="panel"><h2>🏆 ${esc(c.name)} · ${esc(c.season||'')}</h2><p class="muted">Cada competição tem sua própria classificação. Somente partidas finalizadas da fase de grupos ou pontos corridos contam pontos.</p></div>
+ ${groups.length?groups.map(g=>`<div class="panel"><h3>📋 ${esc(g.name)}</h3>${table26(standings26(c.id,g.id))}</div>`).join(''):`<div class="panel"><h3>📋 Classificação ${esc(c.name)}</h3>${table26(standings26(c.id))}</div>`}
+ ${phases.map(phase=>`<div class="panel"><h3>🏆 ${esc(phase)}</h3>${knockout.filter(m=>m.stage26===phase).map(m=>{const [h,a]=score(m);return `<div class="item"><b>${esc(name('teams',m.homeId))} ${h} × ${a} ${esc(name('teams',m.awayId))}</b><small> · ${m.status==='finished'?'Finalizada':'A disputar'}</small><div><button onclick="selectedMatch='${m.id}';tab='report';render()">Abrir súmula</button></div></div>`}).join('')}</div>`).join('')}`;
+}
+const statsBefore26=stats;
+stats=function(){
+ const c=comp26();
+ const old=statsBefore26();
+ const start=old.indexOf('<div class="panel"><h2>Filtrar estatísticas');
+ const playerSection=start>=0?old.slice(start):'';
+ return `<div class="panel"><h2>📊 Tabelas individuais por competição</h2><label>Competição<select onchange="selectComp26(this.value)">${db.competitions.map(x=>`<option value="${esc(x.id)}" ${x.id===c?.id?'selected':''}>${esc(x.name)} (${esc(x.season||'')})</option>`).join('')}</select></label></div>${c?compTables26(c):'<div class="panel">Cadastre uma competição primeiro.</div>'}${playerSection}`;
+};
+function createGroup26(ev){
+ ev.preventDefault();const c=comp26();if(!c)return;
+ const f=new FormData(ev.target),nm=String(f.get('groupName')||'').trim();
+ if(!nm)return alert('Informe o nome do grupo.');
+ c.groups26??=[];
+ if(c.groups26.some(g=>g.name.toLocaleLowerCase()===nm.toLocaleLowerCase()))return alert('Este grupo já existe.');
+ c.groups26.push({id:id(),name:nm,teamIds:[]});save();render();
+}
+function saveGroups26(ev){
+ ev.preventDefault();const c=comp26();if(!c)return;
+ const f=new FormData(ev.target),taken=new Set;
+ for(const g of groupList26(c)){
+  const ids=f.getAll('group_'+g.id);
+  if(ids.some(t=>taken.has(t)))return alert('Uma equipe só pode estar em um grupo da mesma competição.');
+  ids.forEach(t=>taken.add(t));g.teamIds=ids;
+ }
+ save();render();alert('Grupos salvos!');
+}
+function removeGroup26(gid){
+ const c=comp26();if(!c||!confirm('Excluir o grupo? As partidas já criadas serão mantidas.'))return;
+ c.groups26=groupList26(c).filter(g=>g.id!==gid);save();render();
+}
+function generateGroup26(gid){
+ const c=comp26(),g=groupList26(c).find(x=>x.id===gid);if(!g||g.teamIds.length<2)return alert('Selecione ao menos 2 equipes no grupo e salve.');
+ if(db.matches.some(m=>m.competitionId===c.id&&m.group26===gid)&&!confirm('Este grupo já tem jogos. Criar mais confrontos?'))return;
+ const rounds=roundRobin(g.teamIds);
+ let r=1;
+ for(const pairs of rounds){for(const [homeId,awayId] of pairs)db.matches.push({id:id(),homeId,awayId,competitionId:c.id,group26:gid,stage26:'Fase de grupos',round:String(r),date:'',status:'scheduled',events:[]});r++}
+ save();render();alert('Jogos do '+g.name+' criados!');
+}
+function createKnockout26(ev){
+ ev.preventDefault();const c=comp26();if(!c)return;
+ const f=new FormData(ev.target),homeId=String(f.get('homeId')),awayId=String(f.get('awayId')),stage26=String(f.get('stage26')),date=String(f.get('date')||''),legs=String(f.get('legs'));
+ if(!homeId||!awayId||homeId===awayId)return alert('Selecione duas equipes diferentes.');
+ if(!stages26.includes(stage26))return alert('Fase inválida.');
+ const common={competitionId:c.id,stage26,date,status:'scheduled',events:[],round:''};
+ db.matches.push({id:id(),...common,homeId,awayId,leg26:legs==='double'?1:0});
+ if(legs==='double')db.matches.push({id:id(),...common,homeId:awayId,awayId:homeId,leg26:2});
+ save();render();alert('Confronto criado!');
+}
+function tournamentManager26(){
+ const c=comp26();if(!c)return '';
+ const groups=groupList26(c);
+ return `<div class="panel"><h2>🏆 Organizar formato da competição</h2><label>Competição<select onchange="selectComp26(this.value)">${db.competitions.map(x=>`<option value="${esc(x.id)}" ${c.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label><p class="muted">Monte grupos e confrontos eliminatórios sem alterar os campeonatos existentes. Os jogos criados entram automaticamente em Partidas e nas súmulas.</p></div>
+ <div class="panel"><h3>📋 Criar grupos</h3><form onsubmit="createGroup26(event)"><label>Nome do grupo<input name="groupName" placeholder="Grupo A" required></label><button class="primary">Adicionar grupo</button></form></div>
+ ${groups.length?`<form onsubmit="saveGroups26(event)">${groups.map(g=>`<div class="panel"><h3>${esc(g.name)}</h3><p class="muted">Escolha os participantes deste grupo:</p><div class="grid">${db.teams.map(t=>`<label><input type="checkbox" name="group_${g.id}" value="${esc(t.id)}" ${g.teamIds.includes(t.id)?'checked':''} style="width:auto"> ${esc(t.name)}</label>`).join('')}</div><div class="actions"><button type="button" onclick="generateGroup26('${g.id}')">⚡ Gerar jogos do grupo</button><button type="button" onclick="removeGroup26('${g.id}')">Excluir grupo</button></div></div>`).join('')}<div class="panel"><button class="primary">💾 Salvar participantes dos grupos</button></div></form>`:''}
+ <div class="panel"><h3>🏆 Criar fase mata-mata / copa</h3><p class="muted">Crie confrontos de oitavas, quartas, semifinal, final ou outra fase. Você decide os classificados e pode criar ida e volta.</p><form onsubmit="createKnockout26(event)"><label>Fase<select name="stage26">${stages26.filter(x=>x!=='Fase de grupos').map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select></label><div class="grid">${select('Mandante','homeId','teams')}${select('Visitante','awayId','teams')}</div><label>Confronto<select name="legs"><option value="single">Jogo único</option><option value="double">Ida e volta</option></select></label>${field('Data (opcional)','date','','date')}<button class="primary">Criar confronto eliminatório</button></form></div>`;
+}
+const roundsBefore26=rounds;
+rounds=function(){return tournamentManager26()+roundsBefore26()};
+const competitionsBefore26=competitions;
+competitions=function(){return competitionsBefore26()+tournamentManager26()};
+document.querySelector('header .version').textContent='v2.6';
+render();
+
 </script></body></html>
