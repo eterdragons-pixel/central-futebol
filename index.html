@@ -22,7 +22,7 @@
 .stats19 input{text-align:center;margin:0;min-width:0}
 .stats19 b{text-align:center;font-size:13px}
 </style>
-<style>.profile-link21{background:transparent;border:0;color:inherit;font-weight:800;font-size:1rem;text-align:left;padding:4px 0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+<style>.profile-link21{background:transparent;border:0;color:inherit;font-weight:800;font-size:1rem;text-align:left;padding:4px 0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer}</style><style>.competition22{border:1px solid #39465b;border-radius:10px;padding:12px;margin:12px 0}.competition22 summary{cursor:pointer;padding:5px}.competition22 .kpi-grid{margin:12px 0}.competition22 table{width:100%}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -509,6 +509,43 @@ clubPage18=function(){
  return h;
 };
 document.querySelector('header .version').textContent='v2.1';
+render();
+
+/* v2.2: estatísticas manuais + súmulas, separadas por competição e temporada */
+function statRows22(p){
+ const keys=new Map();
+ for(const c of db.competitions)keys.set(statKey14(c.id,statSeason14(c)),[c.id,statSeason14(c)]);
+ for(const k of Object.keys(p.manualStats||{})){
+  try{const a=JSON.parse(k);if(Array.isArray(a)&&a.length===2)keys.set(k,a)}catch{}
+ }
+ return [...keys.values()].map(([cid,season])=>{
+  const c=db.competitions.find(x=>x.id===cid),manual=playerManual14(p,cid,season),games=gameStats14(p,cid,season);
+  const ratings=ratingHistory16(p.id).filter(x=>x.m.competitionId===cid&&statSeason14(c)===season);
+  const average=ratings.length?ratingFmt16(ratings.reduce((n,x)=>n+x.rating,0)/ratings.length):'—';
+  return {cid,season,competition:c?.name||'Competição excluída',manual,games,total:totalStats14(p,cid,season),average,ratings:ratings.length};
+ }).sort((a,b)=>a.competition.localeCompare(b.competition,'pt-BR')||b.season.localeCompare(a.season));
+}
+function statKpis22(data){
+ return `<div class="kpi-grid">${statFields14.map(([k,label])=>`<div class="kpi"><small>${esc(label)}</small><div class="num">${data[k]}</div></div>`).join('')}</div>`;
+}
+function profilePage21(){
+ const p=db.players.find(x=>x.id===profilePlayer21);
+ if(!p)return `<div class="panel">Jogador não encontrado. <button onclick="closeProfile21()">Voltar</button></div>`;
+ const rows=statRows22(p),sum=Object.fromEntries(statFields14.map(([k])=>[k,rows.reduce((n,r)=>n+r.total[k],0)]));
+ const hist=ratingHistory16(p.id),avg=hist.length?ratingFmt16(hist.reduce((n,x)=>n+x.rating,0)/hist.length):'—';
+ const d=discipline19(p);
+ const events=db.matches.flatMap(m=>(m.events||[]).filter(e=>e.playerId===p.id||(e.type==='goal'&&e.secondaryId===p.id)).map(e=>({m,e}))).sort((a,b)=>String(b.m.date||'').localeCompare(String(a.m.date||'')));
+ const typeLabel={goal:'⚽ Gol',yellow:'🟨 Amarelo',red:'🟥 Vermelho',sub:'🔁 Substituição'};
+ return `<div class="actions"><button onclick="closeProfile21()">← Voltar</button></div>
+ <div class="panel"><div class="club-card18">${p.teamId?crest15(p.teamId,'large'):'👤'}<div class="info"><h2 style="margin:0">${esc(p.name)}</h2><p class="muted">${esc(p.position||'Posição não informada')} · #${esc(p.number??'—')}</p><p>${esc(p.teamId?name('teams',p.teamId):'Agente livre')}</p></div></div>
+ <div class="grid"><div><small>Nacionalidade</small><p><b>${esc(p.nationality||'Não informada')}</b></p></div><div><small>Idade</small><p><b>${esc(p.age||'Não informada')}</b></p></div></div>
+ ${p.notes?`<p>📝 ${esc(p.notes)}</p>`:''}<div>${badge19(p)}</div><div class="actions"><button onclick="toggleBlock19('${p.id}')">${d.blocked?'✅ Liberar suspensão':'🚫 Bloquear jogador'}</button><button onclick="choosePlayerStats14('${p.id}')">✏️ Editar estatísticas e notas</button></div></div>
+ <div class="panel"><h2>🏆 Total da carreira registrada</h2>${statKpis22(sum)}<div class="kpi-grid"><div class="kpi"><small>⭐ Nota média</small><div class="num">${avg}</div></div><div class="kpi"><small>📋 Partidas avaliadas</small><div class="num">${hist.length}</div></div></div><p class="muted">Total = estatísticas manuais + eventos das súmulas. Confira se não cadastrou o mesmo gol ou cartão duas vezes.</p></div>
+ <div class="panel"><h2>🏟️ Por competição e temporada</h2>${rows.length?rows.map(r=>`<details class="competition22" ${rows.length===1?'open':''}><summary><b>${esc(r.competition)}</b> · ${esc(r.season)} <span class="muted">(ver estatísticas)</span></summary>${statKpis22(r.total)}<p class="muted">⭐ Nota média: <b>${r.average}</b> (${r.ratings} avaliações)</p><div class="scroll"><table><tr><th>Estatística</th><th>Manual</th><th>Súmula</th><th>Total</th></tr>${statFields14.map(([k,label])=>`<tr><td>${esc(label)}</td><td>${statInt14(r.manual[k])}</td><td>${r.games[k]}</td><td><b>${r.total[k]}</b></td></tr>`).join('')}</table></div><button onclick="selectedPlayer14='${p.id}';selectedComp14='${esc(r.cid)}';selectedSeason14='${esc(r.season)}';tab='playerstats14';render()">✏️ Editar dados desta competição</button></details>`).join(''):'<p class="muted">Cadastre uma competição para começar a acompanhar as estatísticas.</p>'}</div>
+ <div class="panel"><h2>🗓️ Eventos das súmulas</h2>${events.length?events.map(({m,e})=>`<div class="item"><b>${esc(typeLabel[e.type]||e.type)}${e.type==='goal'&&e.secondaryId===p.id&&e.playerId!==p.id?' (assistência)':''}</b><p class="muted">${esc(m.date||'Sem data')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))} · ${esc(name('competitions',m.competitionId))}${e.minute!==undefined?' · '+esc(e.minute)+"'":''}</p></div>`).join(''):'<p class="muted">Nenhum evento individual registrado nas súmulas.</p>'}</div>
+ ${playerHistory16(p.id)}`;
+}
+document.querySelector('header .version').textContent='v2.2';
 render();
 
 </script></body></html>
