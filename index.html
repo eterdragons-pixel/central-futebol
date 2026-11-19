@@ -22,10 +22,10 @@
 .stats19 input{text-align:center;margin:0;min-width:0}
 .stats19 b{text-align:center;font-size:13px}
 </style>
-</head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+<style>.profile-link21{background:transparent;border:0;color:inherit;font-weight:800;font-size:1rem;text-align:left;padding:4px 0;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;cursor:pointer}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
-function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup})[tab]();}
+function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
 function home(){const goals=db.matches.flatMap(m=>m.events||[]).filter(e=>e.type==='goal').length;return `<div class="grid">${[['Clubes',db.teams.length],['Jogadores',db.players.length],['Campeonatos',db.competitions.length],['Partidas',db.matches.length],['Gols',goals]].map(([a,b])=>`<div class="panel"><small>${a}</small><div class="score">${b}</div></div>`).join('')}</div><div class="panel"><h2>Bem-vindo à Central</h2><p>Cadastre clubes e jogadores, crie um campeonato e registre suas partidas. Gols e cartões atualizam automaticamente as súmulas e estatísticas.</p><button class="primary" onclick="go('teams')">Começar pelos clubes</button></div>`}
 function teams(){let x=edit.teams||{};return `<div class="panel"><h2>${x.id?'Editar':'Novo'} clube</h2><form onsubmit="formSubmit(event,'teams')">${field('Nome','name',x.name,'text','required')}${field('Cidade','city',x.city)}${field('País','country',x.country)}<button class="primary">Salvar clube</button></form></div><div class="panel"><h2>Clubes (${db.teams.length})</h2>${db.teams.map(x=>`<div class="item"><b>${esc(x.name)}</b> <small>${esc(x.city)} ${esc(x.country)}</small><div class="actions">${buttons('teams',x)}</div></div>`).join('')||'Nenhum clube cadastrado.'}</div>`}
 function players(){let x=edit.players||{};const grouped=[...db.players].sort((a,b)=>name('teams',a.teamId).localeCompare(name('teams',b.teamId))||String(a.name).localeCompare(String(b.name)));return `<div class="panel"><h2>👤 Gerenciamento de elenco</h2><p class="muted">Cadastre e edite atletas a qualquer momento, mesmo sem escalação, partida ou campeonato. Alterações preservam o ID e as estatísticas do jogador.</p><h3>${x.id?'Editar jogador: '+esc(x.name):'Novo jogador'}</h3><form onsubmit="formSubmit(event,'players')"><div class="grid">${field('Nome','name',x.name,'text','required')}${select('Clube (opcional: agente livre)','teamId','teams',x.teamId)}${field('Número','number',x.number,'number','min="0"')}${field('Posição','position',x.position)}${field('Nacionalidade','nationality',x.nationality)}${field('Idade','age',x.age,'number','min="0"')}</div><div class="actions"><button class="primary">${x.id?'Salvar alterações':'Adicionar jogador'}</button>${x.id?'<button type="button" onclick="edit={};render()">Cancelar edição</button>':''}</div></form></div><div class="panel"><h2>Elenco completo (${db.players.length})</h2><label>Buscar jogador<input id="playerSearch" placeholder="Nome, clube ou posição" oninput="filterPlayerRows()"></label><div id="playerRows">${grouped.map(p=>`<div class="item player-row" data-search="${esc((p.name+' '+(p.position||'')+' '+(p.teamId?name('teams',p.teamId):'Agente livre')).toLowerCase())}"><b>${esc(p.name)}</b> <span class="pill">#${esc(p.number||'?')}</span><p class="muted">${p.teamId?esc(name('teams',p.teamId)):'Agente livre'} · ${esc(p.position||'Sem posição')}</p><div class="actions"><button class="primary" onclick="startEdit('players','${p.id}')">✏️ Editar cadastro</button><button class="danger" onclick="removeItem('players','${p.id}')">Excluir</button></div></div>`).join('')||'<p>Nenhum jogador cadastrado.</p>'}</div></div>`}
@@ -456,6 +456,59 @@ playerStatsPage14=function(){const p=db.players.find(x=>x.id===selectedPlayer14)
 const backupBefore20=backup;
 backup=function(){return backupBefore20().replace('Versão 1.9','Versão 2.0')};
 document.querySelector('header .version').textContent='v2.0';
+render();
+
+
+/* v2.1: ficha individual acessível pelo nome do jogador. */
+let profilePlayer21='',profileReturn21='players';
+function openProfile21(pid){
+ if(!db.players.some(p=>p.id===pid))return;
+ profilePlayer21=pid;profileReturn21=tab;tab='profile21';render();
+ window.scrollTo?.(0,0);
+}
+function closeProfile21(){tab=profileReturn21==='profile21'?'players':profileReturn21;render()}
+function profilePage21(){
+ const p=db.players.find(x=>x.id===profilePlayer21);
+ if(!p)return `<div class="panel">Jogador não encontrado. <button onclick="closeProfile21()">Voltar</button></div>`;
+ const events=db.matches.flatMap(m=>(m.events||[]).filter(e=>e.playerId===p.id||(e.type==='goal'&&e.secondaryId===p.id)).map(e=>({m,e})));
+ const count=t=>events.filter(({e})=>e.type===t&&e.playerId===p.id).length;
+ const goals=count('goal'),yellow=count('yellow'),red=count('red');
+ const assists=events.filter(({e})=>e.type==='goal'&&e.secondaryId===p.id).length;
+ const played=db.matches.filter(m=>m.status==='finished'&&((m.lineups&&Object.values(m.lineups).some(ids=>Array.isArray(ids)&&ids.includes(p.id)))||(m.events||[]).some(e=>e.playerId===p.id||e.secondaryId===p.id))).length;
+ const d=discipline19(p),hist=ratingHistory16(p.id);
+ const avg=hist.length?ratingFmt16(hist.reduce((v,x)=>v+x.rating,0)/hist.length):'—';
+ const recent=events.sort((a,b)=>String(b.m.date||'').localeCompare(String(a.m.date||'')));
+ const typeLabel={goal:'⚽ Gol',yellow:'🟨 Amarelo',red:'🟥 Vermelho',sub:'🔁 Substituição'};
+ return `<div class="actions"><button onclick="closeProfile21()">← Voltar</button></div>
+ <div class="panel"><div class="club-card18">${p.teamId?crest15(p.teamId,'large'):'👤'}<div class="info"><h2 style="margin:0">${esc(p.name)}</h2><p class="muted">${esc(p.position||'Posição não informada')} · #${esc(p.number??'—')}</p><p>${esc(p.teamId?name('teams',p.teamId):'Agente livre')}</p></div></div>
+ <div class="grid"><div><small>Nacionalidade</small><p><b>${esc(p.nationality||'Não informada')}</b></p></div><div><small>Idade</small><p><b>${esc(p.age||'Não informada')}</b></p></div></div>
+ ${p.notes?`<p>📝 ${esc(p.notes)}</p>`:''}
+ <div>${badge19(p)}</div><div class="actions"><button onclick="toggleBlock19('${p.id}')">${d.blocked?'✅ Liberar suspensão':'🚫 Bloquear jogador'}</button><button onclick="choosePlayerStats14('${p.id}')">📊 Estatísticas e notas</button></div></div>
+ <div class="panel"><h2>📊 Carreira registrada</h2><div class="kpi-grid">${[['⚽ Gols',goals],['🎯 Assistências',assists],['🟨 Amarelos',yellow],['🟥 Vermelhos',red],['👟 Jogos',played],['⭐ Nota média',avg]].map(([label,val])=>`<div class="kpi"><small>${label}</small><div class="num">${val}</div></div>`).join('')}</div><p class="muted">Dados extraídos das súmulas e escalações. Estatísticas manuais por competição permanecem disponíveis em Estatísticas e notas.</p></div>
+ <div class="panel"><h2>🗓️ Histórico de eventos</h2>${recent.length?recent.map(({m,e})=>`<div class="item"><b>${esc(typeLabel[e.type]||e.type)}${e.type==='goal'&&e.secondaryId===p.id&&e.playerId!==p.id?' (assistência)':''}</b><p class="muted">${esc(m.date||'Sem data')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))} · ${esc(name('competitions',m.competitionId))}${e.minute!==undefined?' · '+esc(e.minute)+"'":''}</p></div>`).join(''):'<p class="muted">Nenhum evento individual registrado.</p>'}</div>
+ ${playerHistory16(p.id)}`;
+}
+const playersBefore21=players;
+players=function(){
+ let h=playersBefore21();
+ for(const p of db.players){
+  const literal=`<b>${esc(p.name)}</b> <span class="pill">`;
+  h=h.replace(literal,`<button type="button" class="profile-link21" onclick="openProfile21('${p.id}')">${esc(p.name)} 👤</button> <span class="pill">`);
+ }
+ return h;
+};
+const clubBefore21=clubPage18;
+clubPage18=function(){
+ let h=clubBefore21();
+ if(clubSection18==='elenco'){
+  const t=db.teams.find(x=>x.id===clubId18);
+  for(const p of db.players.filter(x=>x.teamId===t?.id)){
+   h=h.replace(`<b>${esc(p.name)}</b> <span class="pill">`,`<button type="button" class="profile-link21" onclick="openProfile21('${p.id}')">${esc(p.name)} 👤</button> <span class="pill">`);
+  }
+ }
+ return h;
+};
+document.querySelector('header .version').textContent='v2.1';
 render();
 
 </script></body></html>
