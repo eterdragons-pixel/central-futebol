@@ -15,7 +15,14 @@
 .club-logo-actions15 label{margin:0;cursor:pointer}
 .club-logo-actions15 input{display:none}
 .club-logo-help15{font-size:12px;color:#a4b1c5}
-.player-notes16{background:#101c30;border:1px solid #34445f;padding:10px;border-radius:10px;margin:8px 0}.player-notes16 p,.player-notes-text16{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}.rating-grid16{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.rating-grid16 label{background:#101a2a;border-radius:10px;padding:9px}.rating-grid16 input{margin-bottom:0}</style><style id="v17-style">.lineup-list17{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:12px 0}.lineup-player17{display:flex;align-items:center;gap:10px;border:1px solid #30405a;border-radius:12px;padding:10px;background:#101a2a}.lineup-player17 input{width:20px;min-height:20px;margin:0}.lineup-player17 span{display:flex;flex-direction:column;gap:4px}.player-notes16 p{white-space:pre-wrap;overflow-wrap:anywhere}</style><style id="v18-style">.club-card18{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #30405a;border-radius:13px;background:#111d30;margin:10px 0}.club-card18 .info{flex:1;min-width:0}.club-card18 .info b{display:block;overflow-wrap:anywhere}.club-menu18{display:flex;gap:7px;overflow-x:auto;padding:7px 0 12px}.club-menu18 button{flex:none}.club-menu18 .chosen{background:#2466e9;border-color:#2466e9}.club-player18{padding:12px 0;border-bottom:1px solid #30405a}.club-player18:last-child{border:0}.club-player18 .actions{margin-top:8px}.club-note18{white-space:pre-wrap;overflow-wrap:anywhere;background:#101c30;padding:9px;border-radius:8px}.club-form18 textarea{min-height:100px}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+.player-notes16{background:#101c30;border:1px solid #34445f;padding:10px;border-radius:10px;margin:8px 0}.player-notes16 p,.player-notes-text16{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}.rating-grid16{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.rating-grid16 label{background:#101a2a;border-radius:10px;padding:9px}.rating-grid16 input{margin-bottom:0}</style><style id="v17-style">.lineup-list17{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:12px 0}.lineup-player17{display:flex;align-items:center;gap:10px;border:1px solid #30405a;border-radius:12px;padding:10px;background:#101a2a}.lineup-player17 input{width:20px;min-height:20px;margin:0}.lineup-player17 span{display:flex;flex-direction:column;gap:4px}.player-notes16 p{white-space:pre-wrap;overflow-wrap:anywhere}</style><style id="v18-style">.club-card18{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #30405a;border-radius:13px;background:#111d30;margin:10px 0}.club-card18 .info{flex:1;min-width:0}.club-card18 .info b{display:block;overflow-wrap:anywhere}.club-menu18{display:flex;gap:7px;overflow-x:auto;padding:7px 0 12px}.club-menu18 button{flex:none}.club-menu18 .chosen{background:#2466e9;border-color:#2466e9}.club-player18{padding:12px 0;border-bottom:1px solid #30405a}.club-player18:last-child{border:0}.club-player18 .actions{margin-top:8px}.club-note18{white-space:pre-wrap;overflow-wrap:anywhere;background:#101c30;padding:9px;border-radius:8px}.club-form18 textarea{min-height:100px}</style>
+<style id="v19-style">
+.susp19{color:#ffd0a6;background:#4a3026;border:1px solid #88513b;border-radius:8px;padding:7px;display:inline-block;margin:6px 0}
+.stats19{display:grid;grid-template-columns:minmax(70px,1fr) minmax(130px,2fr) minmax(70px,1fr);align-items:center;gap:8px;margin:9px 0;border-bottom:1px solid #2a3850;padding-bottom:8px}
+.stats19 input{text-align:center;margin:0;min-width:0}
+.stats19 b{text-align:center;font-size:13px}
+</style>
+</head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup})[tab]();}
@@ -254,4 +261,147 @@ playerStatsPage14=function(){const p=db.players.find(x=>x.id===selectedPlayer14)
 const backupBefore18=backup;
 backup=function(){return backupBefore18().replace('Versão 1.7','Versão 1.8')};
 render();
+
+/* v1.9: disciplina por atleta e estatísticas editáveis na súmula. */
+function cardCounts19(pid){
+ let yellow=0,red=0;
+ for(const m of db.matches)for(const e of m.events||[]){
+  if(e.playerId!==pid)continue;
+  if(e.type==='yellow')yellow++;
+  if(e.type==='red')red++;
+ }
+ return {yellow,red};
+}
+function discipline19(p){
+ const d=p.discipline19||{},c=cardCounts19(p.id);
+ const yellow=Math.max(0,c.yellow-(Number(d.yellowCleared)||0));
+ const red=Math.max(0,c.red-(Number(d.redCleared)||0));
+ const reason=red>0?'Cartão vermelho':yellow>=3?'3 cartões amarelos':'';
+ return {yellow,red,reason,blocked:!!d.manualBlock||!!reason};
+}
+function badge19(p){
+ const d=discipline19(p);
+ return d.blocked?`<span class="susp19">🚫 Suspenso: ${esc(d.manualBlock?'Bloqueio manual':d.reason)} · ${d.yellow} 🟨</span>`:`<small>🟨 ${d.yellow}/3 · Disponível</small>`;
+}
+function release19(pid){
+ const p=db.players.find(x=>x.id===pid);if(!p)return;
+ if(!confirm('Liberar '+p.name+'? Isso zera a contagem disciplinar atual e permite escalá-lo novamente.'))return;
+ const c=cardCounts19(pid);
+ p.discipline19={yellowCleared:c.yellow,redCleared:c.red,manualBlock:false};
+ save();render();
+}
+function toggleBlock19(pid){
+ const p=db.players.find(x=>x.id===pid);if(!p)return;
+ const d=discipline19(p);
+ if(d.blocked){release19(pid);return;}
+ if(!confirm('Bloquear manualmente '+p.name+' até você liberar?'))return;
+ p.discipline19??={};p.discipline19.manualBlock=true;save();render();
+}
+function disciplinePanel19(){
+ return `<div class="panel"><h2>🚫 Suspensões e cartões</h2><p class="muted">3 amarelos acumulados ou 1 vermelho bloqueiam automaticamente o atleta. A liberação é manual, após cumprir a suspensão. A contagem recomeça após liberar.</p>${db.players.map(p=>`<div class="item"><b>${esc(p.name)}</b> · <small>${esc(name('teams',p.teamId))}</small><div>${badge19(p)}</div><button onclick="toggleBlock19('${p.id}')">${discipline19(p).blocked?'✅ Liberar jogador':'🚫 Bloquear jogador'}</button></div>`).join('')||'Cadastre jogadores para controlar suspensões.'}</div>`;
+}
+const statLabels19=[
+ ['shots','Chutes'],['shotsOnTarget','Chutes a gol'],['possession','Posse de bola (%)'],
+ ['passes','Passes'],['passAccuracy','Precisão de passe (%)'],['fouls','Faltas'],
+ ['yellow','Cartões amarelos'],['red','Cartões vermelhos'],['offsides','Impedimentos'],['corners','Escanteios']
+];
+function matchStat19(m,tid,key){
+ const raw=m.teamStats19?.[tid]?.[key];
+ if(raw!==undefined&&raw!==null&&raw!=='')return raw;
+ if(key==='yellow'||key==='red')return (m.events||[]).filter(e=>e.teamId===tid&&e.type===key).length;
+ return 0;
+}
+function statsPanel19(m){
+ const [h,a]=score(m);
+ return `<div class="panel"><h2>📈 Estatísticas da partida</h2><p class="muted">Preencha os números manualmente. O placar (${h} × ${a}) continua sendo calculado pelos gols registrados na súmula. Cartões começam com os valores dos eventos, mas podem ser ajustados para exibição.</p><div class="stats19"><b>${esc(name('teams',m.homeId))}</b><b>Placar</b><b>${esc(name('teams',m.awayId))}</b></div><div class="score">${h} × ${a}</div><form onsubmit="saveTeamStats19(event,'${m.id}')">${statLabels19.map(([key,label])=>`<div class="stats19"><input type="number" inputmode="numeric" min="0" ${key==='possession'||key==='passAccuracy'?'max="100"':''} step="1" name="home_${key}" aria-label="${esc(label)} ${esc(name('teams',m.homeId))}" value="${esc(matchStat19(m,m.homeId,key))}"><b>${esc(label)}</b><input type="number" inputmode="numeric" min="0" ${key==='possession'||key==='passAccuracy'?'max="100"':''} step="1" name="away_${key}" aria-label="${esc(label)} ${esc(name('teams',m.awayId))}" value="${esc(matchStat19(m,m.awayId,key))}"></div>`).join('')}<button class="primary">💾 Salvar estatísticas da partida</button></form></div>`;
+}
+function saveTeamStats19(ev,mid){
+ ev.preventDefault();
+ const m=db.matches.find(x=>x.id===mid);if(!m)return;
+ const f=new FormData(ev.target),next={};
+ for(const [side,tid] of [['home',m.homeId],['away',m.awayId]]){
+  next[tid]={};
+  for(const [key,label] of statLabels19){
+   const raw=String(f.get(side+'_'+key)??'').trim(),n=Number(raw);
+   if(raw===''||!Number.isInteger(n)||n<0||((key==='possession'||key==='passAccuracy')&&n>100))return alert('Valor inválido em '+label+'.');
+   next[tid][key]=n;
+  }
+ }
+ m.teamStats19=next;save();render();alert('Estatísticas da partida salvas!');
+}
+const reportBefore19=report;
+report=function(){
+ const m=db.matches.find(x=>x.id===selectedMatch);
+ return reportBefore19()+(m?statsPanel19(m):'');
+};
+const lineupBefore19=lineupPage17;
+lineupPage17=function(){
+ let page=lineupBefore19();
+ for(const p of db.players){
+  if(!discipline19(p).blocked)continue;
+  const safe=p.id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  page=page.replace(new RegExp('(<input type="checkbox" name="starter" value="'+safe+'" )([^>]*)(>)','g'),
+   (_all,head,attrs,end)=>head+attrs.replace(/\schecked\b/g,'')+' disabled title="Jogador suspenso"'+end);
+ }
+ const team=db.teams.find(t=>t.id===lineupTeam17);
+ if(team){
+  const suspended=db.players.filter(p=>p.teamId===team.id&&discipline19(p).blocked);
+  if(suspended.length)page+=`<div class="panel"><h3>🚫 Indisponíveis por suspensão</h3>${suspended.map(p=>`<div class="item">${esc(p.name)} · ${badge19(p)} <button onclick="release19('${p.id}')">Liberar</button></div>`).join('')}</div>`;
+ }
+ return page;
+};
+const saveLineupBefore19=saveLineup17;
+saveLineup17=function(e){
+ const ids=new FormData(e.target).getAll('starter');
+ if(ids.some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discipline19(p).blocked})){
+  e.preventDefault();return alert('Um jogador suspenso não pode ser escalado. Libere-o primeiro.');
+ }
+ return saveLineupBefore19(e);
+};
+const saveLineupsBefore19=saveLineups;
+saveLineups=function(e,mid){
+ const ids=[...new FormData(e.target).values()];
+ if(ids.some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discipline19(p).blocked})){
+  e.preventDefault();return alert('Há jogadores suspensos na escalação.');
+ }
+ return saveLineupsBefore19(e,mid);
+};
+const saveClubLineupBefore19=saveClubLineup18;
+saveClubLineup18=function(e){
+ const ids=new FormData(e.target).getAll('starter');
+ if(ids.some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discipline19(p).blocked})){
+  e.preventDefault();return alert('Jogadores suspensos não podem ser escalados.');
+ }
+ return saveClubLineupBefore19(e);
+};
+const clubPageBefore19=clubPage18;
+clubPage18=function(){
+ let page=clubPageBefore19();
+ const team=db.teams.find(t=>t.id===clubId18);
+ if(team&&clubSection18==='elenco'){
+  for(const p of db.players.filter(p=>p.teamId===team.id)){
+   const marker=`<button onclick="clubPlayerEdit18('${p.id}')">`;
+   page=page.replace(marker,`${badge19(p)} <button onclick="toggleBlock19('${p.id}')">${discipline19(p).blocked?'Liberar':'Bloquear'}</button> `+marker);
+  }
+ }
+ if(team&&clubSection18==='escalacao'){
+  for(const p of db.players.filter(p=>p.teamId===team.id&&discipline19(p).blocked)){
+   const marker=`value="${esc(p.id)}"`;
+   page=page.replace(marker,marker+' disabled title="Jogador suspenso"');
+  }
+ }
+ return page;
+};
+const playersPageBefore19=playerEditPage17;
+playerEditPage17=function(){return playersPageBefore19()+disciplinePanel19()};
+const playerStatsBefore19=playerStatsPage14;
+playerStatsPage14=function(){
+ const p=db.players.find(x=>x.id===selectedPlayer14);
+ return playerStatsBefore19()+(p?`<div class="panel"><h2>🚫 Situação disciplinar</h2>${badge19(p)}<p><button onclick="toggleBlock19('${p.id}')">${discipline19(p).blocked?'Liberar jogador':'Bloquear manualmente'}</button></p></div>`:'');
+};
+const backupBefore19=backup;
+backup=function(){return backupBefore19().replace('Versão 1.8','Versão 1.9')};
+document.querySelector('header .version').textContent='v1.9';
+render();
+
 </script></body></html>
