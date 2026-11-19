@@ -548,4 +548,72 @@ function profilePage21(){
 document.querySelector('header .version').textContent='v2.2';
 render();
 
+
+/* v2.3: formações, técnicos, capitães e craque pela nota da partida. */
+const formations23=['4-4-2','4-3-3','4-2-3-1','4-1-4-1','4-5-1','4-3-2-1','3-5-2','3-4-3','3-4-2-1','5-3-2','5-4-1','4-2-2-2','Personalizada'];
+function teamCfg23(t,match){
+ const cfg=match?.tactics23?.[t.id]||{};
+ return {formation:cfg.formation||t.formation23||'4-4-2',
+ coach:cfg.coach??t.coach23??'',captain:cfg.captain??t.captain23??''};
+}
+function tacticsForm23(t,match){
+ const c=teamCfg23(t,match),squad=db.players.filter(p=>p.teamId===t.id).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+ const formOpts=formations23.map(x=>`<option value="${esc(x)}" ${c.formation===x?'selected':''}>${esc(x)}</option>`).join('');
+ const capOpts=`<option value="">Sem capitão definido</option>`+squad.map(p=>`<option value="${esc(p.id)}" ${c.captain===p.id?'selected':''}>${esc(p.name)} (#${esc(p.number||'?')})</option>`).join('');
+ return `<div class="panel"><h3>🧠 ${esc(t.name)} ${match?'· Partida':'· Padrão do clube'}</h3>
+ <form onsubmit="saveTactics23(event,'${t.id}','${match?.id||''}')">
+ <div class="grid"><label>Formação<select name="formation">${formOpts}</select></label>
+ <label>Técnico<input name="coach" maxlength="120" value="${esc(c.coach)}" placeholder="Nome do treinador"></label>
+ <label>Capitão<select name="captain">${capOpts}</select></label></div>
+ <p class="muted">${match?'Estas escolhas valem apenas para esta partida.':'As escolhas padrão serão sugeridas nas próximas partidas.'} O capitão deve pertencer ao elenco.</p>
+ <button class="primary">💾 Salvar formação, técnico e capitão</button></form></div>`;
+}
+function saveTactics23(ev,tid,mid){
+ ev.preventDefault();const t=db.teams.find(x=>x.id===tid);if(!t)return;
+ const f=new FormData(ev.target),formation=String(f.get('formation')||''),coach=String(f.get('coach')||'').trim(),captain=String(f.get('captain')||'');
+ if(!formations23.includes(formation))return alert('Formação inválida.');
+ if(captain&&!db.players.some(p=>p.id===captain&&p.teamId===tid))return alert('Capitão não pertence ao clube.');
+ if(mid){
+  const m=db.matches.find(x=>x.id===mid&&(x.homeId===tid||x.awayId===tid));if(!m)return;
+  m.tactics23??={};m.tactics23[tid]={formation,coach,captain};
+ }else{t.formation23=formation;t.coach23=coach;t.captain23=captain;}
+ save();render();alert('Configuração salva!');
+}
+function star23(m){
+ const eligible=new Set([...(m.lineups?.[m.homeId]||[]),...(m.lineups?.[m.awayId]||[])]);
+ for(const e of m.events||[]){if(e.playerId)eligible.add(e.playerId);if(e.secondaryId)eligible.add(e.secondaryId)}
+ // Também aceita atletas avaliados sem eventos ou escalação registrada.
+ for(const pid of Object.keys(m.playerRatings||{}))eligible.add(pid);
+ const candidates=[...eligible].map(pid=>({p:db.players.find(p=>p.id===pid),rating:ratingValue16(m,pid)}))
+ .filter(x=>x.p&&(x.p.teamId===m.homeId||x.p.teamId===m.awayId)&&x.rating!==null&&Number.isFinite(x.rating)&&x.rating>=0&&x.rating<=10)
+ .sort((a,b)=>b.rating-a.rating||String(a.p.name).localeCompare(String(b.p.name),'pt-BR'));
+ return candidates.length?{top:candidates.filter(x=>x.rating===candidates[0].rating),rating:candidates[0].rating}:null;
+}
+function matchTactics23(m){
+ const h=db.teams.find(x=>x.id===m.homeId),a=db.teams.find(x=>x.id===m.awayId);
+ const star=star23(m);
+ const desc=t=>{const c=teamCfg23(t,m),cap=db.players.find(p=>p.id===c.captain&&p.teamId===t.id);
+ return `<div class="item"><b>${esc(t.name)}</b><p>📐 ${esc(c.formation)} · 🧑‍💼 Técnico: ${esc(c.coach||'Não definido')} · © Capitão: ${esc(cap?.name||'Não definido')}</p></div>`};
+ return `<div class="panel"><h2>🏅 Craque da partida</h2>${star?`<p><b>⭐ ${star.top.map(x=>esc(x.p.name)).join(' / ')}</b> · Nota ${esc(ratingFmt16(star.rating))}${star.top.length>1?' (empate na maior nota)':''}</p>`:'<p class="muted">Sem craque definido. Avalie os jogadores desta partida para identificar automaticamente a maior nota.</p>'}<p class="muted">Calculado pelas notas individuais registradas nesta partida, sem alterar as avaliações.</p></div>
+ <div class="panel"><h2>📋 Formações e comando técnico</h2>${h?desc(h):''}${a?desc(a):''}</div>
+ ${h?tacticsForm23(h,m):''}${a?tacticsForm23(a,m):''}`;
+}
+const reportBefore23=report;
+report=function(){const m=db.matches.find(x=>x.id===selectedMatch);return reportBefore23()+(m?matchTactics23(m):'')};
+const lineupPageBefore23=lineupPage17;
+lineupPage17=function(){
+ const base=lineupPageBefore23();
+ const t=db.teams.find(x=>x.id===lineupTeam17);
+ const m=db.matches.find(x=>x.id===lineupMatch17&&(x.homeId===t?.id||x.awayId===t?.id));
+ return base+(t?tacticsForm23(t,m):'');
+};
+const clubPageBefore23=clubPage18;
+clubPage18=function(){
+ const base=clubPageBefore23();
+ const t=db.teams.find(x=>x.id===clubId18);
+ return base+(t&&['escalacao','dados'].includes(clubSection18)?tacticsForm23(t,null):'');
+};
+document.querySelector('header .version').textContent='v2.3';
+render();
+
 </script></body></html>
