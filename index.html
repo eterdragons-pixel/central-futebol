@@ -616,4 +616,26 @@ clubPage18=function(){
 document.querySelector('header .version').textContent='v2.3';
 render();
 
+
+/* v2.4: clubes de demonstração opcionais e não destrutivos. */
+const demoClubs24=[
+ {name:'Atlético Aurora',city:'Belo Horizonte',country:'Brasil',coach:'Rafael Monteiro',players:[['Gabriel Rocha',1,'Goleiro'],['Lucas Ferreira',2,'Lateral direito'],['Bruno Almeida',3,'Zagueiro'],['Caio Mendes',4,'Zagueiro'],['Pedro Nascimento',6,'Lateral esquerdo'],['Matheus Costa',5,'Volante'],['André Ribeiro',8,'Meio-campista'],['Thiago Martins',10,'Meia ofensivo'],['Felipe Souza',7,'Ponta direita'],['Diego Oliveira',11,'Ponta esquerda'],['Henrique Lima',9,'Centroavante']]},
+ {name:'União Estrela',city:'Curitiba',country:'Brasil',coach:'Marcelo Duarte',players:[['Rafael Batista',1,'Goleiro'],['Vinícius Lopes',2,'Lateral direito'],['Gustavo Pereira',3,'Zagueiro'],['Eduardo Barros',4,'Zagueiro'],['Daniel Castro',6,'Lateral esquerdo'],['Samuel Teixeira',5,'Volante'],['Igor Fernandes',8,'Meio-campista'],['Leonardo Barbosa',10,'Meia ofensivo'],['Arthur Gomes',7,'Ponta direita'],['Murilo Carvalho',11,'Ponta esquerda'],['João Vitor',9,'Centroavante']]}
+];
+function addDemoClubs24(){
+ const missing=demoClubs24.filter(t=>!db.teams.some(x=>x.name.toLocaleLowerCase('pt-BR')===t.name.toLocaleLowerCase('pt-BR')));
+ if(!missing.length)return alert('Os dois clubes de exemplo já estão cadastrados.');
+ if(!confirm('Adicionar '+missing.length+' clube(s) de exemplo, com 11 jogadores cada? Seus dados existentes serão preservados.'))return;
+ for(const t of missing){
+  const tid=id(),players=t.players.map(([name,number,position])=>({id:id(),teamId:tid,name,number:String(number),position,nationality:'Brasileira',age:'',notes:'Jogador fictício de demonstração'}));
+  db.teams.push({id:tid,name:t.name,city:t.city,country:t.country,coach23:t.coach,formation23:'4-3-3',captain23:players.find(p=>p.number==='4')?.id||'',defaultLineup:players.map(p=>p.id)});
+  db.players.push(...players);
+ }
+ save();render();alert('Clubes de exemplo adicionados!');
+}
+const homeBefore24=home;
+home=function(){return homeBefore24()+`<div class="panel"><h2>⚽ Clubes de demonstração</h2><p>Adicione Atlético Aurora e União Estrela, com 11 jogadores fictícios em cada elenco, técnicos, capitães e formação 4-3-3. Seus clubes e partidas atuais não serão alterados.</p><button class="primary" onclick="addDemoClubs24()">➕ Adicionar 2 clubes de exemplo</button></div>`};
+document.querySelector('header .version').textContent='v2.4';
+render();
+
 </script></body></html>
