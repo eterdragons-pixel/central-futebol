@@ -1118,4 +1118,96 @@ render=function(){
 document.querySelector('header .version').textContent='v3.4';
 render();
 
+
+/* v3.5: suspensão por jogos finalizados do próprio clube na competição. */
+function finishedTeamGames35(p,cid){
+ return db.matches.filter(m=>m.competitionId===cid&&m.status==='finished'&&(m.homeId===p.teamId||m.awayId===p.teamId)).map(m=>m.id);
+}
+function suspensionRecord35(p,cid){
+ p.discipline30??={};p.discipline30[cid]??={};return p.discipline30[cid];
+}
+function activateSuspension35(p,cid,length,reason){
+ const d=suspensionRecord35(p,cid);
+ d.suspension35={total:length,reason,finishedAtStart:finishedTeamGames35(p,cid),teamId:p.teamId};
+ save();
+}
+function suspensionStatus35(p,cid){
+ if(!discComp30(cid))return {blocked:false,remaining:0,total:0};
+ const d=suspensionRecord35(p,cid),totals=discTotals30(p,cid);
+ let active=d.suspension35;
+ if(active&&active.teamId!==p.teamId){
+  // Transferências não devem consumir jogos de outro clube.
+  active.finishedAtStart=finishedTeamGames35(p,cid);active.teamId=p.teamId;save();
+ }
+ if(!active){
+  const y=Math.max(0,totals.yellow-statInt14(d.yellowCleared));
+  const r=Math.max(0,totals.red-statInt14(d.redCleared));
+  if(d.manualBlock||r>0||y>=3){
+   const reason=d.manualBlock?'Bloqueio manual':r>0?'Cartão vermelho':'3 cartões amarelos';
+   activateSuspension35(p,cid,1,reason);active=d.suspension35;
+  }
+ }
+ if(!active)return {blocked:false,remaining:0,total:0};
+ const before=new Set(active.finishedAtStart||[]);
+ const served=finishedTeamGames35(p,cid).filter(mid=>!before.has(mid)).length;
+ const remaining=Math.max(0,statInt14(active.total)-served);
+ if(remaining===0){
+  d.yellowCleared=totals.yellow;d.redCleared=totals.red;d.manualBlock=false;
+  d.suspension35=null;save();
+  return {blocked:false,remaining:0,total:statInt14(active.total),justCompleted:true};
+ }
+ return {blocked:true,remaining,total:statInt14(active.total),served,reason:active.reason};
+}
+function discState30(p,cid){
+ const totals=discTotals30(p,cid),d=p.discipline30?.[cid]||{},s=suspensionStatus35(p,cid);
+ return {...s,yellow:Math.max(0,totals.yellow-statInt14(d.yellowCleared)),red:Math.max(0,totals.red-statInt14(d.redCleared)),manualBlock:!!d.manualBlock};
+}
+function discBadge30(p,cid){
+ if(!discComp30(cid))return '<small>Escolha uma competição</small>';
+ const d=discState30(p,cid);
+ return d.blocked?`<span class="susp19">🚫 ${esc(name('competitions',cid))}: ${d.remaining} ${d.remaining===1?'jogo restante':'jogos restantes'} de ${d.total} · ${esc(d.reason||'Suspensão')}</span>`:`<small>✅ Disponível em ${esc(name('competitions',cid))} · 🟨 ${d.yellow}/3</small>`;
+}
+function release30(pid,cid){
+ const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ if(!confirm('Liberar '+p.name+' antecipadamente somente em '+name('competitions',cid)+'?'))return;
+ const total=discTotals30(p,cid),d=suspensionRecord35(p,cid);
+ d.yellowCleared=total.yellow;d.redCleared=total.red;d.manualBlock=false;d.suspension35=null;
+ save();render();
+}
+function setSuspension35(ev,pid,cid){
+ ev.preventDefault();const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ const length=Number(new FormData(ev.target).get('games'));
+ if(!Number.isInteger(length)||length<1||length>30)return alert('Escolha entre 1 e 30 jogos.');
+ const d=suspensionRecord35(p,cid);d.manualBlock=true;
+ activateSuspension35(p,cid,length,'Suspensão definida manualmente');render();
+}
+function toggleBlock30(pid,cid){
+ const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ if(discState30(p,cid).blocked)return release30(pid,cid);
+ const d=suspensionRecord35(p,cid);d.manualBlock=true;
+ activateSuspension35(p,cid,1,'Bloqueio manual');render();
+}
+const disciplinePanelBefore35=disciplinePanel19;
+disciplinePanel19=function(){
+ const base=disciplinePanelBefore35();
+ const cid=disciplineCompetition30;
+ if(!discComp30(cid))return base;
+ const controls=db.players.filter(p=>!cardSearch31||p.name.toLocaleLowerCase().includes(cardSearch31.toLocaleLowerCase())).map(p=>{
+  const st=discState30(p,cid);
+  return `<div class="item"><b>${esc(p.name)}</b> · ${esc(name('teams',p.teamId))}<div>${discBadge30(p,cid)}</div><form onsubmit="setSuspension35(event,'${p.id}','${cid}')"><label>Definir duração da suspensão (jogos)<input name="games" type="number" min="1" max="30" value="${st.blocked?st.remaining:1}" required></label><button class="primary">Aplicar suspensão</button></form></div>`;
+ }).join('');
+ return base+`<div class="panel"><h2>🗓️ Duração das suspensões</h2><p class="muted">A contagem diminui automaticamente quando o clube termina uma partida na competição selecionada. Jogos de outras competições não contam. Você pode definir ou alterar a quantidade de jogos.</p>${controls||'<p>Nenhum jogador encontrado.</p>'}</div>`;
+};
+const playerStatsBefore35=playerStatsPage14;
+playerStatsPage14=function(){
+ const html=playerStatsBefore35(),p=db.players.find(x=>x.id===selectedPlayer14);
+ if(!p)return html;
+ const cid=discComp30(profileDisciplineCompetition32)?.id||db.competitions[0]?.id;
+ if(!cid)return html;
+ const st=discState30(p,cid);
+ return html+`<div class="panel"><h3>🗓️ Duração da suspensão em ${esc(name('competitions',cid))}</h3><div>${discBadge30(p,cid)}</div><form onsubmit="setSuspension35(event,'${p.id}','${cid}')"><label>Quantidade de jogos<input name="games" type="number" min="1" max="30" value="${st.blocked?st.remaining:1}" required></label><button class="primary">Definir suspensão nesta competição</button></form></div>`;
+};
+document.querySelector('header .version').textContent='v3.5';
+render();
+
 </script></body></html>
