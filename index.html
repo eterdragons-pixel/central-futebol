@@ -1044,4 +1044,40 @@ playerStatsPage14=function(){
 };
 document.querySelector('header .version').textContent='v3.2';
 render();
+
+/* v3.3 - grupos múltiplos, persistentes e gerenciados individualmente. */
+let groupDraft33={};
+function createGroup26(ev){
+ ev.preventDefault();const c=comp26();if(!c)return;
+ const nm=String(new FormData(ev.target).get('groupName')||'').trim();
+ if(!nm)return alert('Digite um nome para o grupo.');
+ c.groups26=Array.isArray(c.groups26)?c.groups26:[];
+ if(c.groups26.some(g=>g.name.trim().toLocaleLowerCase()===nm.toLocaleLowerCase()))return alert('Já existe um grupo com esse nome nesta competição.');
+ c.groups26.push({id:id(),name:nm,teamIds:[]});
+ save();render();alert(nm+' criado e salvo! Você pode criar outros grupos.');
+}
+function saveSingleGroup33(ev,gid){
+ ev.preventDefault();const c=comp26(),g=groupList26(c).find(x=>x.id===gid);if(!g)return;
+ const selected=new FormData(ev.target).getAll('teams');
+ const clash=groupList26(c).find(other=>other.id!==gid&&selected.some(t=>other.teamIds.includes(t)));
+ if(clash)return alert('Uma equipe já está no '+clash.name+'. Remova-a daquele grupo antes.');
+ g.teamIds=selected;save();render();alert(g.name+' salvo!');
+}
+function renameGroup33(gid){
+ const c=comp26(),g=groupList26(c).find(x=>x.id===gid);if(!g)return;
+ const name=prompt('Novo nome do grupo:',g.name)?.trim();if(!name||name===g.name)return;
+ if(groupList26(c).some(x=>x.id!==gid&&x.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return alert('Nome já utilizado.');
+ g.name=name;save();render();
+}
+function tournamentManager26(){
+ const c=comp26();if(!c)return '<div class="panel">Cadastre uma competição primeiro.</div>';
+ const groups=groupList26(c);
+ return `<div class="panel"><h2>🏆 Formato da competição</h2><label>Campeonato<select onchange="selectComp26(this.value)">${db.competitions.map(x=>`<option value="${esc(x.id)}" ${c.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label><p class="muted">Os grupos ficam salvos dentro do campeonato selecionado. Crie quantos precisar e gerencie cada um separadamente.</p></div>
+ <div class="panel"><h3>➕ Novo grupo</h3><form onsubmit="createGroup26(event)"><label>Nome<input name="groupName" placeholder="Grupo A, Grupo B..." required></label><button class="primary">Criar e salvar grupo</button></form><p class="muted">${groups.length} grupo(s) salvo(s) em ${esc(c.name)}.</p></div>
+ <div class="panel"><h3>📋 Grupos cadastrados</h3>${groups.length?`<div class="champ-grid">${groups.map(g=>`<div class="champ-card"><h3>🏆 ${esc(g.name)}</h3><p>${g.teamIds.length} equipes · Salvo nesta competição</p><form onsubmit="saveSingleGroup33(event,'${g.id}')"><div class="grid">${db.teams.map(t=>`<label><input type="checkbox" name="teams" value="${esc(t.id)}" ${g.teamIds.includes(t.id)?'checked':''} style="width:auto"> ${esc(t.name)}</label>`).join('')}</div><div class="actions"><button class="primary">💾 Salvar equipes</button></div></form><div class="actions"><button type="button" onclick="renameGroup33('${g.id}')">✏️ Renomear</button><button type="button" onclick="generateGroup26('${g.id}')">⚡ Gerar jogos</button><button type="button" onclick="removeGroup26('${g.id}')">🗑 Excluir</button></div></div>`).join('')}</div>`:'<p class="muted">Nenhum grupo criado ainda. Use o formulário acima para criar o primeiro.</p>'}</div>
+ <div class="panel"><h3>🏆 Fase mata-mata / copa</h3><p class="muted">Crie confrontos de oitavas, quartas, semifinal, final ou outra fase.</p><form onsubmit="createKnockout26(event)"><label>Fase<select name="stage26">${stages26.filter(x=>x!=='Fase de grupos').map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select></label><div class="grid">${select('Mandante','homeId','teams')}${select('Visitante','awayId','teams')}</div><label>Confronto<select name="legs"><option value="single">Jogo único</option><option value="double">Ida e volta</option></select></label>${field('Data (opcional)','date','','date')}<button class="primary">Criar confronto eliminatório</button></form></div>`;
+}
+document.querySelector('header .version').textContent='v3.3';
+render();
+
 </script></body></html>
