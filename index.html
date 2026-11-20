@@ -914,4 +914,79 @@ go=function(t){if(t==='matchCreate29'&&tab!=='matchCreate29')edit.matches=null;g
 document.querySelector('header .version').textContent='v2.9';
 render();
 
+
+/* v3.0 - disciplina isolada por competição, com cartões manuais e de súmula. */
+let disciplineCompetition30='';
+function discComp30(cid){return db.competitions.find(c=>c.id===cid)}
+function discTotals30(p,cid){
+ const c=discComp30(cid);if(!c)return {yellow:0,red:0};
+ const season=statSeason14(c),manual=playerManual14(p,cid,season),games=gameStats14(p,cid,season);
+ return {yellow:statInt14(manual.yellow)+games.yellow,red:statInt14(manual.red)+games.red};
+}
+function discState30(p,cid){
+ const total=discTotals30(p,cid),d=p.discipline30?.[cid]||{};
+ const yellow=Math.max(0,total.yellow-(Number(d.yellowCleared)||0)),red=Math.max(0,total.red-(Number(d.redCleared)||0));
+ const reason=red>0?'Cartão vermelho':yellow>=3?'3 cartões amarelos':'';
+ return {yellow,red,reason,blocked:!!d.manualBlock||!!reason,manualBlock:!!d.manualBlock};
+}
+function discBadge30(p,cid){
+ if(!discComp30(cid))return '<small>Escolha uma competição</small>';
+ const d=discState30(p,cid);
+ return d.blocked?`<span class="susp19">🚫 Suspenso em ${esc(name('competitions',cid))}: ${esc(d.manualBlock?'Bloqueio manual':d.reason)} · ${d.yellow} 🟨</span>`:`<small>🟨 ${d.yellow}/3 · Disponível em ${esc(name('competitions',cid))}</small>`;
+}
+function release30(pid,cid){
+ const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ if(!confirm('Liberar '+p.name+' somente em '+name('competitions',cid)+'? A contagem desta competição será reiniciada.'))return;
+ const total=discTotals30(p,cid);p.discipline30??={};p.discipline30[cid]={yellowCleared:total.yellow,redCleared:total.red,manualBlock:false};
+ save();render();
+}
+function toggleBlock30(pid,cid){
+ const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ if(discState30(p,cid).blocked)return release30(pid,cid);
+ if(!confirm('Bloquear '+p.name+' somente em '+name('competitions',cid)+'?'))return;
+ p.discipline30??={};p.discipline30[cid]??={};p.discipline30[cid].manualBlock=true;save();render();
+}
+function discipline19(p,cid){if(cid&&discComp30(cid))return discState30(p,cid);return {yellow:0,red:0,reason:'',blocked:false}}
+function badge19(p,cid){return cid?discBadge30(p,cid):'<small>Suspensões controladas por competição</small>'}
+function release19(pid,cid){if(!cid)return alert('Selecione uma competição para liberar o jogador.');return release30(pid,cid)}
+function toggleBlock19(pid,cid){if(!cid)return alert('Selecione uma competição para controlar a suspensão.');return toggleBlock30(pid,cid)}
+function disciplinePanel19(){
+ const cid=discComp30(disciplineCompetition30)?.id||db.competitions[0]?.id||'';disciplineCompetition30=cid;
+ return `<div class="panel"><h2>🚫 Suspensões por competição</h2><p class="muted">Cartões manuais e da súmula são somados por competição e temporada. Três amarelos ou um vermelho suspendem o atleta apenas nesta competição. A liberação é manual após cumprir a punição.</p><label>Competição<select onchange="disciplineCompetition30=this.value;render()">${db.competitions.map(c=>`<option value="${esc(c.id)}" ${cid===c.id?'selected':''}>${esc(c.name)} · ${esc(statSeason14(c))}</option>`).join('')}</select></label>${cid?db.players.map(p=>`<div class="item"><b>${esc(p.name)}</b> · <small>${esc(name('teams',p.teamId))}</small><div>${discBadge30(p,cid)}</div><button onclick="toggleBlock30('${p.id}','${cid}')">${discState30(p,cid).blocked?'✅ Liberar nesta competição':'🚫 Bloquear nesta competição'}</button></div>`).join(''):'Cadastre uma competição primeiro.'}</div>`;
+}
+function lineupCompetition30(){
+ const m=db.matches.find(x=>x.id===lineupMatch17);
+ return m?.competitionId||null;
+}
+const lineupBefore30=lineupPage17;
+lineupPage17=function(){
+ let html=lineupBefore30(),cid=lineupCompetition30();
+ if(!cid)return html+'<div class="panel"><p class="muted">Escalação padrão do clube: suspensões serão verificadas quando uma partida de competição for selecionada.</p></div>';
+ for(const p of db.players){
+  if(!discState30(p,cid).blocked)continue;
+  const safe=p.id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  html=html.replace(new RegExp('(<input type="checkbox" name="starter" value="'+safe+'" )([^>]*)(>)','g'),(_a,head,attrs,end)=>head+attrs.replace(/\schecked\b/g,'')+' disabled title="Suspenso nesta competição"'+end);
+ }
+ return html+`<div class="panel"><h3>🚫 Suspensões em ${esc(name('competitions',cid))}</h3>${db.players.filter(p=>p.teamId===lineupTeam17&&discState30(p,cid).blocked).map(p=>`<div class="item">${esc(p.name)} · ${discBadge30(p,cid)} <button onclick="release30('${p.id}','${cid}')">Liberar</button></div>`).join('')||'<p class="muted">Nenhum atleta suspenso.</p>'}</div>`;
+};
+const saveLineupBefore30=saveLineup17;
+saveLineup17=function(e){
+ const cid=lineupCompetition30(),ids=new FormData(e.target).getAll('starter');
+ if(cid&&ids.some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discState30(p,cid).blocked})){e.preventDefault();return alert('Há atletas suspensos nesta competição.')}
+ return saveLineupBefore30(e);
+};
+const saveLineupsBefore30=saveLineups;
+saveLineups=function(e,mid){
+ const cid=db.matches.find(m=>m.id===mid)?.competitionId;
+ if(cid&&[...new FormData(e.target).values()].some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discState30(p,cid).blocked})){e.preventDefault();return alert('Há atletas suspensos nesta competição.')}
+ return saveLineupsBefore30(e,mid);
+};
+const saveClubLineupBefore30=saveClubLineup18;
+saveClubLineup18=function(e){
+ const cid=db.matches.find(m=>m.id===lineupMatch17)?.competitionId;
+ if(cid&&new FormData(e.target).getAll('starter').some(pid=>{const p=db.players.find(x=>x.id===pid);return p&&discState30(p,cid).blocked})){e.preventDefault();return alert('Há atletas suspensos nesta competição.')}
+ return saveClubLineupBefore30(e);
+};
+document.querySelector('header .version').textContent='v3.0';
+render();
 </script></body></html>
