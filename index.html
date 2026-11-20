@@ -1023,4 +1023,25 @@ function disciplinePanel19(){
 document.querySelector('header .version').textContent='v3.1';
 render();
 
+
+/* v3.2: seletor de competição na situação disciplinar individual. */
+let profileDisciplineCompetition32='';
+function setProfileDiscipline32(cid){profileDisciplineCompetition32=cid;render()}
+const playerStatsBefore32=playerStatsPage14;
+playerStatsPage14=function(){
+ const html=playerStatsBefore32();
+ const p=db.players.find(x=>x.id===selectedPlayer14);
+ if(!p)return html;
+ const cid=discComp30(profileDisciplineCompetition32)?.id||db.competitions[0]?.id||'';
+ profileDisciplineCompetition32=cid;
+ const start=html.lastIndexOf('<div class="panel"><h2>🚫 Situação disciplinar</h2>');
+ const base=start>=0?html.slice(0,start):html;
+ const options=db.competitions.map(c=>`<option value="${esc(c.id)}" ${cid===c.id?'selected':''}>${esc(c.name)} · ${esc(statSeason14(c))}</option>`).join('');
+ const state=cid?discState30(p,cid):null;
+ return base+`<div class="panel"><h2>🚫 Situação disciplinar</h2><p class="muted">Selecione a competição para definir onde este jogador está indisponível. A suspensão não afeta os outros campeonatos.</p>
+ ${cid?`<label>Competição<select onchange="setProfileDiscipline32(this.value)">${options}</select></label><div class="item">${discBadge30(p,cid)}</div><div class="actions"><button class="${state?.blocked?'':'primary'}" onclick="toggleBlock30('${p.id}','${cid}')">${state?.blocked?'✅ Liberar nesta competição':'🚫 Tornar indisponível nesta competição'}</button></div>`:'<p class="muted">Cadastre uma competição para controlar a disponibilidade.</p>'}
+ <h3>Resumo das competições</h3>${db.competitions.map(c=>`<div class="item"><b>${esc(c.name)}</b><div>${discBadge30(p,c.id)}</div></div>`).join('')||'<p class="muted">Nenhuma competição cadastrada.</p>'}</div>`;
+};
+document.querySelector('header .version').textContent='v3.2';
+render();
 </script></body></html>
