@@ -100,7 +100,9 @@ a{color:#93d7ff}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button{transition:none}}
 </style>
-</head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+<style id="v28-hub">
+.champ-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 18px}.champ-head h2{font-size:24px;margin:0}.champ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}.champ-card{background:linear-gradient(145deg,#20334b,#142338);border:1px solid #3a5470;border-radius:19px;padding:19px;display:flex;flex-direction:column;gap:12px}.champ-card .champ-symbol{width:48px;height:48px;display:grid;place-items:center;background:#254b55;border-radius:15px;font-size:26px}.champ-card h3{font-size:19px;margin:0}.champ-card p{margin:0;color:#a9bdd3;font-size:13px}.champ-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.champ-metrics span{background:#0e1b2d;padding:9px 5px;border-radius:11px;text-align:center;font-size:12px;color:#b6c6d9}.champ-metrics b{display:block;color:#f3faff;font-size:18px}.champ-actions{display:flex;gap:8px;flex-wrap:wrap}.champ-actions button{flex:1}.champ-back{margin:5px 0 14px}.champ-detail-nav{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.champ-detail-nav button{white-space:nowrap;flex:none}.champ-empty{text-align:center;padding:36px 20px}.champ-empty .emoji{font-size:40px}.champ-summary{display:flex;gap:8px;flex-wrap:wrap}.champ-summary span{background:#20364b;border:1px solid #38516c;border-radius:9px;padding:7px 10px;color:#c4d6e9;font-size:12px}
+</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -831,6 +833,51 @@ rounds=function(){return tournamentManager26()+roundsBefore26()};
 const competitionsBefore26=competitions;
 competitions=function(){return competitionsBefore26()+tournamentManager26()};
 document.querySelector('header .version').textContent='v2.7';
+render();
+
+
+/* v2.8: área dedicada aos campeonatos cadastrados. */
+let championshipDetail28=null,championshipSection28='table';
+function openChampionship28(cid){championshipDetail28=cid;selectedCompetition=cid;compView26=cid;tab='championshipHub28';render();window.scrollTo(0,0)}
+function showChampionshipSection28(section){championshipSection28=section;render()}
+function champData28(c){const ms=db.matches.filter(m=>m.competitionId===c.id);const teams=new Set(ms.flatMap(m=>[m.homeId,m.awayId]));for(const g of groupList26(c))for(const t of g.teamIds)teams.add(t);return {ms,teams:teams.size,done:ms.filter(m=>m.status==='finished').length}}
+function championshipHub28(){
+ const c=db.competitions.find(x=>x.id===championshipDetail28);
+ if(c){
+  const d=champData28(c),sections=[['table','📊 Classificação'],['games','⚽ Jogos'],['groups','👥 Grupos e mata-mata']];
+  const buttons=sections.map(([k,n])=>`<button class="${championshipSection28===k?'primary':''}" onclick="showChampionshipSection28('${k}')">${n}</button>`).join('');
+  let content='';
+  if(championshipSection28==='table')content=compTables26(c);
+  if(championshipSection28==='games'){
+   const ms=[...d.ms].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||(Number(a.round)||0)-(Number(b.round)||0));
+   content=`<div class="panel"><h2>⚽ Jogos de ${esc(c.name)}</h2>${ms.map(m=>{const [h,a]=score(m);return `<div class="item"><b>${esc(name('teams',m.homeId))} ${h} × ${a} ${esc(name('teams',m.awayId))}</b><p class="muted">${esc(m.stage26||'Rodada '+(m.round||'?'))} · ${esc(m.date||'Data a definir')} · ${m.status==='finished'?'Finalizada':'Agendada'}</p><button onclick="selectedMatch='${m.id}';tab='report';render()">Abrir súmula</button></div>`}).join('')||'<p class="muted">Nenhum jogo nesta competição.</p>'}<button class="primary" onclick="selectedCompetition='${c.id}';go('rounds')">Gerenciar calendário</button></div>`;
+  }
+  if(championshipSection28==='groups')content=tournamentManager26();
+  return `<button class="champ-back" onclick="championshipDetail28=null;render()">← Todos os campeonatos</button><div class="panel"><h2>🏆 ${esc(c.name)}</h2><p class="muted">Temporada ${esc(c.season||'Não informada')}</p><div class="champ-summary"><span>${d.teams} clubes</span><span>${d.ms.length} jogos</span><span>${d.done} finalizados</span></div></div><div class="champ-detail-nav">${buttons}</div>${content}`;
+ }
+ championshipDetail28=null;
+ return `<div class="champ-head"><div><h2>🏆 Meus campeonatos</h2><p class="muted">Cada campeonato com seu próprio calendário, classificação e fases.</p></div><button class="primary" onclick="go('competitions')">＋ Novo campeonato</button></div>
+ ${db.competitions.length?`<div class="champ-grid">${db.competitions.map(c=>{const d=champData28(c);return `<article class="champ-card"><div class="champ-symbol">🏆</div><div><h3>${esc(c.name)}</h3><p>Temporada ${esc(c.season||'Não informada')}</p></div><div class="champ-metrics"><span><b>${d.teams}</b>Clubes</span><span><b>${d.ms.length}</b>Jogos</span><span><b>${d.done}</b>Finalizados</span></div><div class="champ-actions"><button class="primary" onclick="championshipSection28='table';openChampionship28('${c.id}')">Abrir campeonato</button></div></article>`}).join('')}</div>`:`<div class="panel champ-empty"><div class="emoji">🏆</div><h3>Nenhum campeonato ainda</h3><p class="muted">Crie sua primeira competição e ela aparecerá aqui, separada das demais.</p><button class="primary" onclick="go('competitions')">Criar campeonato</button></div>`}`;
+}
+const renderBefore28=render;
+render=function(){
+ if(tab==='championshipHub28'){$('app').innerHTML=championshipHub28()}else renderBefore28();
+ const nav=$('nav');
+ if(nav){
+  const original=tabs17.filter(([k])=>k!=='competitions');
+  const at=original.findIndex(([k])=>k==='rounds');
+  original.splice(at,0,['championshipHub28','🏆 Meus campeonatos'],['competitions','➕ Criar campeonato']);
+  nav.innerHTML=original.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');
+ }
+ const bottom=$('bottom-nav');
+ if(bottom){
+  const links=[['inicio','⌂','Início'],['championshipHub28','🏆','Campeonatos'],['matches','⚽','Partidas'],['players','♟','Atletas'],['backup','☰','Mais']];
+  bottom.innerHTML=links.map(([k,ico,label])=>`<button class="${(tab===k||(k==='championshipHub28'&&tab==='competitions'))?'selected':''}" onclick="go('${k}')"><span class="ico">${ico}</span><span>${label}</span></button>`).join('');
+ }
+};
+const goBefore28=go;
+go=function(t){if(t==='championshipHub28')championshipDetail28=null;goBefore28(t)};
+document.querySelector('header .version').textContent='v2.8';
 render();
 
 </script></body></html>
