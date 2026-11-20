@@ -880,4 +880,38 @@ go=function(t){if(t==='championshipHub28')championshipDetail28=null;goBefore28(t
 document.querySelector('header .version').textContent='v2.8';
 render();
 
+
+/* v2.9: criar partida separado do calendário de partidas cadastradas. */
+const matchPageBefore29=matches;
+function createMatchPage29(){
+ const full=matchPageBefore29(),cut=full.indexOf('<div class="panel"><h2>🏆 Partidas por competição</h2>');
+ return `<div class="champ-head"><div><h2>➕ ${edit.matches?.id?'Editar partida':'Criar partida'}</h2><p class="muted">Cadastre um novo confronto sem misturar com o calendário existente.</p></div><button onclick="go('matches')">← Partidas cadastradas</button></div>${cut>=0?full.slice(0,cut):full}`;
+}
+matches=function(){
+ const full=matchPageBefore29(),cut=full.indexOf('<div class="panel"><h2>🏆 Partidas por competição</h2>');
+ return `<div class="champ-head"><div><h2>⚽ Partidas cadastradas</h2><p class="muted">Consulte confrontos por competição, abra súmulas e edite resultados.</p></div><button class="primary" onclick="edit={};go('matchCreate29')">＋ Criar partida</button></div>${cut>=0?full.slice(cut):'<div class="panel"><p class="muted">Nenhuma partida cadastrada.</p></div>'}`;
+};
+const startEditBefore29=startEdit;
+startEdit=function(t,i){if(t==='matches'){tab='matchCreate29';edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}else startEditBefore29(t,i)};
+const renderBefore29=render;
+render=function(){
+ if(tab==='matchCreate29'){$('app').innerHTML=createMatchPage29()}else renderBefore29();
+ const nav=$('nav');
+ if(nav){
+  const opts=tabs17.filter(([k])=>k!=='competitions'&&k!=='matches');
+  const at=opts.findIndex(([k])=>k==='rounds');
+  opts.splice(at,0,['championshipHub28','🏆 Meus campeonatos'],['competitions','➕ Criar campeonato'],['matches','⚽ Partidas cadastradas'],['matchCreate29','➕ Criar partida']);
+  nav.innerHTML=opts.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');
+ }
+ const bottom=$('bottom-nav');
+ if(bottom){
+  const links=[['inicio','⌂','Início'],['championshipHub28','🏆','Campeonatos'],['matches','⚽','Partidas'],['matchCreate29','＋','Criar partida'],['backup','☰','Mais']];
+  bottom.innerHTML=links.map(([k,ico,label])=>`<button class="${(tab===k||(k==='matches'&&tab==='report'))?'selected':''}" onclick="go('${k}')"><span class="ico">${ico}</span><span>${label}</span></button>`).join('');
+ }
+};
+const goBefore29=go;
+go=function(t){if(t==='matchCreate29'&&tab!=='matchCreate29')edit.matches=null;goBefore29(t)};
+document.querySelector('header .version').textContent='v2.9';
+render();
+
 </script></body></html>
