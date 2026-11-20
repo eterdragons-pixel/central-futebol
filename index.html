@@ -989,4 +989,38 @@ saveClubLineup18=function(e){
 };
 document.querySelector('header .version').textContent='v3.0';
 render();
+
+/* v3.1: edição rápida dos cartões manuais diretamente por competição. */
+let cardSearch31='';
+function saveCards31(ev,pid,cid){
+ ev.preventDefault();
+ const p=db.players.find(x=>x.id===pid),c=discComp30(cid);
+ if(!p||!c)return alert('Jogador ou competição não encontrado.');
+ const f=new FormData(ev.target),y=Number(f.get('yellow')),r=Number(f.get('red'));
+ if(!Number.isInteger(y)||y<0||!Number.isInteger(r)||r<0)return alert('Informe números inteiros não negativos.');
+ const season=statSeason14(c),key=statKey14(cid,season);
+ p.manualStats??={};
+ p.manualStats[key]={...p.manualStats[key],yellow:y,red:r};
+ // Não apaga cartões de súmula. Mantém a liberação já concedida até o limite dos cartões existentes.
+ const total=discTotals30(p,cid),d=p.discipline30?.[cid];
+ if(d){d.yellowCleared=Math.min(statInt14(d.yellowCleared),total.yellow);d.redCleared=Math.min(statInt14(d.redCleared),total.red)}
+ save();render();
+}
+function disciplinePanel19(){
+ const cid=discComp30(disciplineCompetition30)?.id||db.competitions[0]?.id||'';disciplineCompetition30=cid;
+ const c=discComp30(cid),season=statSeason14(c);
+ const players=db.players.filter(p=>!cardSearch31||p.name.toLocaleLowerCase().includes(cardSearch31.toLocaleLowerCase()));
+ return `<div class="panel"><h2>🟨 Cartões e suspensões por competição</h2><p class="muted">Edite rapidamente os cartões <b>manuais</b> de cada jogador. Cartões da súmula são somados automaticamente e não são alterados aqui. A suspensão vale somente para a competição selecionada.</p>
+ <label>Competição<select onchange="disciplineCompetition30=this.value;render()">${db.competitions.map(x=>`<option value="${esc(x.id)}" ${cid===x.id?'selected':''}>${esc(x.name)} · ${esc(statSeason14(x))}</option>`).join('')}</select></label>
+ <label>Buscar jogador<input placeholder="Nome do jogador" value="${esc(cardSearch31)}" onchange="cardSearch31=this.value;render()"></label>
+ ${c?players.map(p=>{
+ const manual=playerManual14(p,cid,season),games=gameStats14(p,cid,season),totals=discTotals30(p,cid),state=discState30(p,cid);
+ return `<div class="item"><b>${esc(p.name)}</b> <small>· ${esc(name('teams',p.teamId))}</small><p class="muted">Súmula: ${games.yellow} 🟨 / ${games.red} 🟥 · Total: ${totals.yellow} 🟨 / ${totals.red} 🟥</p>
+ <form onsubmit="saveCards31(event,'${p.id}','${cid}')"><div class="grid"><label>🟨 Amarelos manuais<input name="yellow" type="number" min="0" step="1" required value="${statInt14(manual.yellow)}"></label><label>🟥 Vermelhos manuais<input name="red" type="number" min="0" step="1" required value="${statInt14(manual.red)}"></label></div><div class="actions"><button class="primary">💾 Salvar cartões</button></div></form>
+ <div>${discBadge30(p,cid)}</div><button onclick="toggleBlock30('${p.id}','${cid}')">${state.blocked?'✅ Liberar nesta competição':'🚫 Bloquear nesta competição'}</button></div>`;
+ }).join('')||'<p class="muted">Nenhum jogador encontrado.</p>':'<p>Cadastre uma competição primeiro.</p>'}</div>`;
+}
+document.querySelector('header .version').textContent='v3.1';
+render();
+
 </script></body></html>
