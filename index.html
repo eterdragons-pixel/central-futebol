@@ -1517,4 +1517,17 @@ matches=function(){
 document.querySelector('header .version').textContent='v4.1';
 render();
 
+
+/* v4.2: acesso a Clubes na barra inferior, na última posição. */
+const renderBefore42=render;
+render=function(){
+ renderBefore42();
+ const bottom=document.getElementById('bottom-nav');
+ if(!bottom)return;
+ const links=[['inicio','⌂','Início'],['championshipHub28','🏆','Campeonatos'],['matches','⚽','Partidas'],['backup','☰','Mais'],['teams','🛡️','Times']];
+ bottom.innerHTML=links.map(([key,ico,label])=>`<button class="${(tab===key||(key==='matches'&&tab==='report'))?'selected':''}" onclick="go('${key}')"><span class="ico">${ico}</span><span>${label}</span></button>`).join('');
+};
+document.querySelector('header .version').textContent='v4.2';
+render();
+
 </script></body></html>
