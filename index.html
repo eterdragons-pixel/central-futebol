@@ -102,7 +102,7 @@ a{color:#93d7ff}
 </style>
 <style id="v28-hub">
 .champ-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 18px}.champ-head h2{font-size:24px;margin:0}.champ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}.champ-card{background:linear-gradient(145deg,#20334b,#142338);border:1px solid #3a5470;border-radius:19px;padding:19px;display:flex;flex-direction:column;gap:12px}.champ-card .champ-symbol{width:48px;height:48px;display:grid;place-items:center;background:#254b55;border-radius:15px;font-size:26px}.champ-card h3{font-size:19px;margin:0}.champ-card p{margin:0;color:#a9bdd3;font-size:13px}.champ-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.champ-metrics span{background:#0e1b2d;padding:9px 5px;border-radius:11px;text-align:center;font-size:12px;color:#b6c6d9}.champ-metrics b{display:block;color:#f3faff;font-size:18px}.champ-actions{display:flex;gap:8px;flex-wrap:wrap}.champ-actions button{flex:1}.champ-back{margin:5px 0 14px}.champ-detail-nav{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.champ-detail-nav button{white-space:nowrap;flex:none}.champ-empty{text-align:center;padding:36px 20px}.champ-empty .emoji{font-size:40px}.champ-summary{display:flex;gap:8px;flex-wrap:wrap}.champ-summary span{background:#20364b;border:1px solid #38516c;border-radius:9px;padding:7px 10px;color:#c4d6e9;font-size:12px}
-</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style><style id="suspension37">.suspension-alert37{border-left:4px solid #e27767}.suspended-player37{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(140,140,140,.2)}.available37{font-weight:600;color:#4eaf7a}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style><style id="suspension37">.suspension-alert37{border-left:4px solid #e27767}.suspended-player37{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(140,140,140,.2)}.available37{font-weight:600;color:#4eaf7a}</style><style id="susp39">.susp39-tag{display:inline-block;margin:4px 0;padding:3px 7px;border-radius:6px;background:#622b30;color:#fff;font-weight:700;font-size:.78rem}.susp39-row{opacity:.7;border-left:3px solid #dd6a6a;padding-left:8px}.susp39-row input{cursor:not-allowed}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -1338,6 +1338,74 @@ function suspensionAlert37(m,tid){
  ${suspended.length?suspended.map(p=>`<div class="suspended-player37"><b>🟥 ${esc(p.name)}</b><span>${suspensionView38(p,m.competitionId,m.id).remaining} jogo(s) restantes</span></div>`).join(''):'<p class="available37">✅ Nenhum suspenso nesta partida.</p>'}</div>`;
 }
 document.querySelector('header .version').textContent='v3.8';
+render();
+
+
+/* v3.9: suspensos visíveis dentro das duas interfaces de escalação. */
+function suspensionAtMatch39(p,m){
+ if(!m||!m.competitionId)return {blocked:false,remaining:0};
+ return suspensionView38(p,m.competitionId,m.id);
+}
+function squadStatus39(p,m){
+ const st=suspensionAtMatch39(p,m);
+ return st.blocked?`<span class="susp39-tag">🚫 SUSPENSO · ${st.remaining} ${st.remaining===1?'jogo restante':'jogos restantes'}</span>`:'';
+}
+function lineupSection(m){
+ const saved=m.lineups||{};
+ return `<div class="panel"><h2>📋 Escalações da partida</h2><p class="muted">Suspensos nesta partida são identificados e não podem ser escalados. A suspensão considera a competição e a partida inicial configurada.</p>
+ ${suspensionAlert37(m,m.homeId)}${suspensionAlert37(m,m.awayId)}
+ <form onsubmit="saveLineups(event,'${m.id}')">${[m.homeId,m.awayId].map(t=>{
+ const squad=db.players.filter(p=>p.teamId===t).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+ const eligible=squad.filter(p=>!suspensionAtMatch39(p,m).blocked);
+ const chosen=saved[t]||eligible.slice(0,11).map(p=>p.id);
+ return `<h3>${esc(name('teams',t))}</h3>${squad.length?squad.map(p=>{
+ const blocked=suspensionAtMatch39(p,m).blocked;
+ return `<label class="lineup-player ${blocked?'susp39-row':''}"><input type="checkbox" name="starter_${esc(t)}" value="${esc(p.id)}" ${!blocked&&chosen.includes(p.id)?'checked':''} ${blocked?'disabled':''}> <span>#${esc(p.number||'?')} ${esc(p.name)} <small>(${esc(p.position||'Sem posição')})</small> ${squadStatus39(p,m)}</span></label>`;
+ }).join(''):'<p class="muted">Cadastre jogadores neste clube.</p>'}`;
+ }).join('')}<button class="primary">Salvar escalações</button></form></div>`;
+}
+function saveLineups(ev,mid){
+ ev.preventDefault();const m=db.matches.find(x=>x.id===mid);if(!m)return;
+ const f=new FormData(ev.target),lineups={...(m.lineups||{})};
+ for(const tid of [m.homeId,m.awayId]){
+  const ids=f.getAll('starter_'+tid);
+  if(ids.length>11)return alert('Selecione no máximo 11 titulares por clube.');
+  if(ids.some(pid=>!db.players.some(p=>p.id===pid&&p.teamId===tid)))return alert('Jogador não pertence ao clube.');
+  const suspended=ids.map(pid=>db.players.find(p=>p.id===pid)).filter(p=>suspensionAtMatch39(p,m).blocked);
+  if(suspended.length)return alert('Não é possível escalar suspensos: '+suspended.map(p=>p.name).join(', '));
+  lineups[tid]=ids;
+ }
+ m.lineups=lineups;save();render();alert('Escalações salvas!');
+}
+lineupPage17=function(){
+ const tid=lineupTeam17||db.teams[0]?.id||'';lineupTeam17=tid;
+ const team=db.teams.find(t=>t.id===tid);
+ const squad=db.players.filter(p=>p.teamId===tid).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+ const games=db.matches.filter(m=>m.homeId===tid||m.awayId===tid);
+ const match=games.find(m=>m.id===lineupMatch17);
+ const defaultIds=(team?.defaultLineup||[]).filter(pid=>squad.some(p=>p.id===pid));
+ const selected=match?(match.lineups?.[tid]||defaultIds):defaultIds;
+ const list=squad.map(p=>{
+  const blocked=match&&suspensionAtMatch39(p,match).blocked;
+  return `<label class="lineup-player17 ${blocked?'susp39-row':''}"><input type="checkbox" name="starter" value="${esc(p.id)}" ${!blocked&&selected.includes(p.id)?'checked':''} ${blocked?'disabled':''}><span><b>${esc(p.name)}</b> <small>#${esc(p.number||'?')} · ${esc(p.position||'Sem posição')}</small> ${match?squadStatus39(p,match):''}</span></label>`;
+ }).join('');
+ return `<div class="panel"><h2>📋 Escalações dos clubes</h2><p class="muted">Escolha uma partida para visualizar os suspensos daquele jogo. Na escalação habitual não há bloqueio por competição.</p>
+ <label>Clube<select onchange="lineupTeam17=this.value;lineupMatch17='';render()">${options('teams',tid)}</select></label>
+ ${team?`<label>Tipo de escalação<select onchange="lineupMatch17=this.value;render()"><option value="">Escalação padrão do clube</option>${games.map(m=>`<option value="${esc(m.id)}" ${lineupMatch17===m.id?'selected':''}>${esc(name('competitions',m.competitionId))} · Rodada ${esc(m.round||'?')} · ${esc(m.date||'Sem data')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))}</option>`).join('')}</select></label>`:''}</div>
+ ${match?suspensionAlert37(match,tid):''}
+ ${team?`<div class="panel"><h3>${match?'Escalação da partida':'Time titular padrão'}: ${esc(team.name)}</h3><p class="muted">Selecione até 11 titulares. Jogadores suspensos ficam identificados e desabilitados.</p><form onsubmit="saveLineup17(event)"><div class="lineup-list17">${list||'<p>Cadastre jogadores neste clube.</p>'}</div><div class="actions"><button class="primary" ${!squad.length?'disabled':''}>💾 Salvar escalação</button>${match?'<button type="button" onclick="loadDefaultLineup17()">Usar titulares padrão</button>':''}</div></form></div>`:'<div class="panel">Cadastre um clube para criar escalações.</div>'}`;
+};
+const saveLineupBefore39=saveLineup17;
+saveLineup17=function(ev){
+ const m=db.matches.find(x=>x.id===lineupMatch17&&(x.homeId===lineupTeam17||x.awayId===lineupTeam17));
+ if(m){
+  const ids=new FormData(ev.target).getAll('starter');
+  const bad=ids.map(pid=>db.players.find(p=>p.id===pid)).filter(p=>p&&suspensionAtMatch39(p,m).blocked);
+  if(bad.length){ev.preventDefault();return alert('Não é possível escalar suspensos: '+bad.map(p=>p.name).join(', '));}
+ }
+ return saveLineupBefore39(ev);
+};
+document.querySelector('header .version').textContent='v3.9';
 render();
 
 </script></body></html>
