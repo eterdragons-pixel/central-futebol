@@ -1469,4 +1469,52 @@ report=function(){
 document.querySelector('header .version').textContent='v4.0';
 render();
 
+
+/* v4.1: abas de rodada dentro de cada competição, inclusive jogos manuais. */
+let selectedMatchRound41={};
+function chooseMatchRound41(cid,key){selectedMatchRound41[cid]=key;render()}
+function matchRoundKey41(m){
+ const raw=String(m.round??'').trim();
+ if(!raw)return 'no-round';
+ const n=Number(raw);
+ return Number.isFinite(n)&&n>0?'round:'+n:'other:'+raw;
+}
+function matchRoundLabel41(key){
+ if(key==='no-round')return 'Sem rodada';
+ if(key.startsWith('round:'))return 'Rodada '+key.slice(6);
+ return key.slice(6);
+}
+function compareRoundKeys41(a,b){
+ const ar=a.startsWith('round:'),br=b.startsWith('round:');
+ if(ar&&br)return Number(a.slice(6))-Number(b.slice(6));
+ if(ar!==br)return ar?-1:1;
+ if(a==='no-round')return 1;if(b==='no-round')return -1;
+ return a.localeCompare(b,'pt-BR',{numeric:true});
+}
+matches=function(){
+ const comps=[...db.competitions].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR'));
+ const valid=new Set(comps.map(c=>c.id));
+ const orphan=db.matches.filter(m=>!m.competitionId||!valid.has(m.competitionId));
+ const sections=[...comps.map(c=>({id:c.id,name:c.name,season:c.season||'',matches:db.matches.filter(m=>m.competitionId===c.id)})),...(orphan.length?[{id:'unassigned',name:'Sem competição',season:'',matches:orphan}]:[])];
+ if(!sections.some(x=>x.id===selectedMatchCompetition36))selectedMatchCompetition36=sections[0]?.id||'';
+ const chosen=sections.find(x=>x.id===selectedMatchCompetition36);
+ const grouped=new Map();
+ if(chosen)for(const m of chosen.matches){const k=matchRoundKey41(m);if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(m)}
+ const keys=[...grouped.keys()].sort(compareRoundKeys41);
+ if(chosen&&!keys.includes(selectedMatchRound41[chosen.id]))selectedMatchRound41[chosen.id]=keys[0]||'';
+ const active=chosen?selectedMatchRound41[chosen.id]:'';
+ const games=[...(grouped.get(active)||[])].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.id).localeCompare(String(b.id)));
+ const cards=games.map(m=>{
+  const [h,a]=score(m);
+  return `<div class="item"><b>${esc(name('teams',m.homeId))} ${h} × ${a} ${esc(name('teams',m.awayId))}</b><p class="muted">${esc(m.date||'Data a definir')} · ${esc(m.stage26||matchRoundLabel41(matchRoundKey41(m)))} · ${m.status==='finished'?'Finalizada':m.status==='live'?'Em andamento':'Agendada'}</p>${matchDiscipline40(m,true)}<div class="actions"><button class="primary" onclick="selectedMatch='${m.id}';tab='report';render()">Abrir súmula</button>${buttons('matches',m)}</div></div>`;
+ }).join('');
+ return `<div class="champ-head"><div><h2>⚽ Partidas por competição e rodada</h2><p class="muted">Cada campeonato e cada rodada possuem sua própria aba. Partidas manuais com a mesma rodada ficam juntas.</p></div><button class="primary" onclick="edit={};go('matchCreate29')">＋ Criar partida</button></div>
+ <div class="panel"><h3>🏆 Escolher competição</h3><div class="match-tabs25">${sections.map(c=>`<button type="button" class="${c.id===selectedMatchCompetition36?'selected':''}" onclick="chooseMatchCompetition36('${c.id}')">${esc(c.name)} <small>(${c.matches.length})</small></button>`).join('')||'<p class="muted">Crie uma competição para organizar suas partidas.</p>'}</div></div>
+ ${chosen?`<div class="panel"><h2>${esc(chosen.name)}${chosen.season?' · '+esc(chosen.season):''}</h2><p class="muted">${chosen.matches.length} partidas nesta competição · ${keys.length} rodada(s) cadastrada(s)</p>
+ <h3>📅 Escolher rodada</h3><div class="match-tabs25 match-round-tabs41">${keys.map(k=>`<button type="button" class="${k===active?'selected':''}" onclick="chooseMatchRound41('${chosen.id}','${k.replace(/'/g,'&#39;')}')">${esc(matchRoundLabel41(k))} <small>(${grouped.get(k).length})</small></button>`).join('')||'<p class="muted">Cadastre uma partida para criar automaticamente a aba da rodada.</p>'}</div></div>
+ ${keys.length?`<div class="panel"><h2>${esc(matchRoundLabel41(active))}</h2><p class="muted">${games.length} partida(s) nesta rodada</p>${cards}</div>`:''}`:''}`;
+};
+document.querySelector('header .version').textContent='v4.1';
+render();
+
 </script></body></html>
