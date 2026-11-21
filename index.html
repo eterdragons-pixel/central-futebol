@@ -1210,4 +1210,26 @@ playerStatsPage14=function(){
 document.querySelector('header .version').textContent='v3.5';
 render();
 
+
+/* v3.6: partidas estritamente separadas por competição. */
+let selectedMatchCompetition36='';
+function chooseMatchCompetition36(cid){selectedMatchCompetition36=cid;render()}
+matches=function(){
+ const comps=[...db.competitions].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR'));
+ const valid=new Set(comps.map(c=>c.id));
+ const orphan=db.matches.filter(m=>!m.competitionId||!valid.has(m.competitionId));
+ const sections=[...comps.map(c=>({id:c.id,name:c.name,season:c.season||'',matches:db.matches.filter(m=>m.competitionId===c.id)})),...(orphan.length?[{id:'unassigned',name:'Sem competição',season:'',matches:orphan}]:[])];
+ if(!sections.some(x=>x.id===selectedMatchCompetition36))selectedMatchCompetition36=sections[0]?.id||'';
+ const chosen=sections.find(x=>x.id===selectedMatchCompetition36);
+ const cards=chosen?[...chosen.matches].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'') )||(Number(a.round)||0)-(Number(b.round)||0)).map(m=>{
+  const [h,a]=score(m);
+  return `<div class="item"><b>${esc(name('teams',m.homeId))} ${h} × ${a} ${esc(name('teams',m.awayId))}</b><p class="muted">${esc(m.date||'Data a definir')} · ${esc(m.stage26||'Rodada '+(m.round||'?'))} · ${m.status==='finished'?'Finalizada':m.status==='live'?'Em andamento':'Agendada'}</p><div class="actions"><button class="primary" onclick="selectedMatch='${m.id}';tab='report';render()">Abrir súmula</button>${buttons('matches',m)}</div></div>`;
+ }).join(''):'';
+ return `<div class="champ-head"><div><h2>⚽ Partidas por competição</h2><p class="muted">Cada campeonato possui sua própria lista de partidas, sem misturar confrontos.</p></div><button class="primary" onclick="edit={};go('matchCreate29')">＋ Criar partida</button></div>
+ <div class="panel"><h3>🏆 Escolher competição</h3><div class="match-tabs25">${sections.map(c=>`<button type="button" class="${c.id===selectedMatchCompetition36?'selected':''}" onclick="chooseMatchCompetition36('${c.id}')">${esc(c.name)} <small>(${c.matches.length})</small></button>`).join('')||'<p class="muted">Crie uma competição para organizar suas partidas.</p>'}</div></div>
+ ${chosen?`<div class="panel"><h2>${esc(chosen.name)}${chosen.season?' · '+esc(chosen.season):''}</h2><p class="muted">${chosen.matches.length} partidas nesta competição</p>${cards||'<p class="muted">Nenhuma partida cadastrada nesta competição.</p>'}</div>`:''}`;
+};
+document.querySelector('header .version').textContent='v3.6';
+render();
+
 </script></body></html>
