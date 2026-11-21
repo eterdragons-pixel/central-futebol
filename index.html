@@ -102,7 +102,7 @@ a{color:#93d7ff}
 </style>
 <style id="v28-hub">
 .champ-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 18px}.champ-head h2{font-size:24px;margin:0}.champ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}.champ-card{background:linear-gradient(145deg,#20334b,#142338);border:1px solid #3a5470;border-radius:19px;padding:19px;display:flex;flex-direction:column;gap:12px}.champ-card .champ-symbol{width:48px;height:48px;display:grid;place-items:center;background:#254b55;border-radius:15px;font-size:26px}.champ-card h3{font-size:19px;margin:0}.champ-card p{margin:0;color:#a9bdd3;font-size:13px}.champ-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.champ-metrics span{background:#0e1b2d;padding:9px 5px;border-radius:11px;text-align:center;font-size:12px;color:#b6c6d9}.champ-metrics b{display:block;color:#f3faff;font-size:18px}.champ-actions{display:flex;gap:8px;flex-wrap:wrap}.champ-actions button{flex:1}.champ-back{margin:5px 0 14px}.champ-detail-nav{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.champ-detail-nav button{white-space:nowrap;flex:none}.champ-empty{text-align:center;padding:36px 20px}.champ-empty .emoji{font-size:40px}.champ-summary{display:flex;gap:8px;flex-wrap:wrap}.champ-summary span{background:#20364b;border:1px solid #38516c;border-radius:9px;padding:7px 10px;color:#c4d6e9;font-size:12px}
-</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style><style id="suspension37">.suspension-alert37{border-left:4px solid #e27767}.suspended-player37{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(140,140,140,.2)}.available37{font-weight:600;color:#4eaf7a}</style><style id="susp39">.susp39-tag{display:inline-block;margin:4px 0;padding:3px 7px;border-radius:6px;background:#622b30;color:#fff;font-weight:700;font-size:.78rem}.susp39-row{opacity:.7;border-left:3px solid #dd6a6a;padding-left:8px}.susp39-row input{cursor:not-allowed}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style><style id="suspension37">.suspension-alert37{border-left:4px solid #e27767}.suspended-player37{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(140,140,140,.2)}.available37{font-weight:600;color:#4eaf7a}</style><style id="susp39">.susp39-tag{display:inline-block;margin:4px 0;padding:3px 7px;border-radius:6px;background:#622b30;color:#fff;font-weight:700;font-size:.78rem}.susp39-row{opacity:.7;border-left:3px solid #dd6a6a;padding-left:8px}.susp39-row input{cursor:not-allowed}</style><style id="expulsions40">.expulsions40-compact{margin:8px 0;padding:8px 10px;border-left:3px solid #db6666;background:rgba(175,60,60,.09);font-size:.86rem}.expulsions40-compact>div+div{margin-top:4px}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -1406,6 +1406,67 @@ saveLineup17=function(ev){
  return saveLineupBefore39(ev);
 };
 document.querySelector('header .version').textContent='v3.9';
+render();
+
+
+/* v4.0: expulsões da súmula e indisponibilidades manuais visíveis nas partidas. */
+function matchExpulsions40(m){
+ const result=[];
+ for(const e of m.events||[]){
+  if(e.type!=='red'||!e.playerId)continue;
+  const p=db.players.find(x=>x.id===e.playerId);
+  if(!p)continue;
+  const existing=result.find(x=>x.playerId===p.id);
+  if(existing){existing.minutes.push(e.minute);continue;}
+  result.push({playerId:p.id,name:p.name,teamId:e.teamId||p.teamId,minutes:[e.minute]});
+ }
+ return result;
+}
+function manualUnavailable40(m){
+ if(!m.competitionId)return [];
+ const reds=matchExpulsions40(m);
+ return db.players.filter(p=>(p.teamId===m.homeId||p.teamId===m.awayId)&&!reds.some(x=>x.playerId===p.id))
+ .map(p=>{
+  const d=p.discipline30?.[m.competitionId]||{};
+  const manual=playerManual14(p,m.competitionId,statSeason14(discComp30(m.competitionId)));
+  const status=suspensionView38(p,m.competitionId,m.id);
+  const isManual=!!d.manualBlock||statInt14(manual.red)>0||!!d.suspension35?.reason?.toLowerCase().includes('manual');
+  return {p,status,isManual,manualReds:statInt14(manual.red)};
+ }).filter(x=>x.isManual&&x.status.blocked);
+}
+function matchDiscipline40(m,compact=false){
+ const reds=matchExpulsions40(m),manual=manualUnavailable40(m);
+ if(compact){
+  if(!reds.length&&!manual.length)return '';
+  return `<div class="expulsions40-compact">${reds.length?`<div>🟥 Expulsos na partida: ${reds.map(x=>esc(x.name)).join(', ')}</div>`:''}
+  ${manual.length?`<div>🚫 Indisponíveis por registro manual: ${manual.map(x=>esc(x.p.name)).join(', ')}</div>`:''}</div>`;
+ }
+ return `<div class="panel"><h2>🟥 Expulsões e suspensões desta partida</h2>
+ <p class="muted">Cartões vermelhos registrados na súmula são mostrados como expulsões da partida. Suspensões manuais são mostradas separadamente, sem atribuir uma expulsão a um jogo no qual ela não foi registrada.</p>
+ <h3>🟥 Expulsos na súmula</h3>${reds.length?reds.map(x=>`<div class="item"><b>${esc(x.name)}</b> · ${esc(name('teams',x.teamId))}<p class="muted">Expulsão ${x.minutes.map(t=>esc(t)+"'").join(', ')}</p></div>`).join(''):'<p class="muted">Nenhuma expulsão registrada na súmula.</p>'}
+ <h3>🚫 Suspensões e cartões manuais</h3>${manual.length?manual.map(x=>`<div class="item"><b>${esc(x.p.name)}</b> · ${esc(name('teams',x.p.teamId))}<p class="muted">${x.manualReds?`${x.manualReds} cartão(ões) vermelho(s) manual(is) · `:''}${x.status.remaining} jogo(s) restante(s) de suspensão</p></div>`).join(''):'<p class="muted">Nenhuma indisponibilidade manual ativa nesta partida.</p>'}</div>`;
+}
+const matchesBefore40=matches;
+matches=function(){
+ const html=matchesBefore40();
+ // Anexa indicadores à lista de partidas sem alterar a lógica de seleção por competição.
+ const wrap=document.createElement('div');wrap.innerHTML=html;
+ const chosen=selectedMatchCompetition36;
+ const games=db.matches.filter(m=>chosen==='unassigned'?(!m.competitionId||!db.competitions.some(c=>c.id===m.competitionId)):m.competitionId===chosen)
+ .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||(Number(a.round)||0)-(Number(b.round)||0));
+ const items=[...wrap.querySelectorAll('.panel .item')];
+ for(let i=0;i<Math.min(items.length,games.length);i++){
+  const marker=document.createElement('div');marker.innerHTML=matchDiscipline40(games[i],true);
+  items[i].append(...marker.childNodes);
+ }
+ return wrap.innerHTML;
+};
+const reportBefore40=report;
+report=function(){
+ const html=reportBefore40(),m=db.matches.find(x=>x.id===selectedMatch);
+ return m?html+matchDiscipline40(m):html;
+};
+document.querySelector('header .version').textContent='v4.0';
 render();
 
 </script></body></html>
