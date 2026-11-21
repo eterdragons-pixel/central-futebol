@@ -102,7 +102,7 @@ a{color:#93d7ff}
 </style>
 <style id="v28-hub">
 .champ-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 18px}.champ-head h2{font-size:24px;margin:0}.champ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}.champ-card{background:linear-gradient(145deg,#20334b,#142338);border:1px solid #3a5470;border-radius:19px;padding:19px;display:flex;flex-direction:column;gap:12px}.champ-card .champ-symbol{width:48px;height:48px;display:grid;place-items:center;background:#254b55;border-radius:15px;font-size:26px}.champ-card h3{font-size:19px;margin:0}.champ-card p{margin:0;color:#a9bdd3;font-size:13px}.champ-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.champ-metrics span{background:#0e1b2d;padding:9px 5px;border-radius:11px;text-align:center;font-size:12px;color:#b6c6d9}.champ-metrics b{display:block;color:#f3faff;font-size:18px}.champ-actions{display:flex;gap:8px;flex-wrap:wrap}.champ-actions button{flex:1}.champ-back{margin:5px 0 14px}.champ-detail-nav{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.champ-detail-nav button{white-space:nowrap;flex:none}.champ-empty{text-align:center;padding:36px 20px}.champ-empty .emoji{font-size:40px}.champ-summary{display:flex;gap:8px;flex-wrap:wrap}.champ-summary span{background:#20364b;border:1px solid #38516c;border-radius:9px;padding:7px 10px;color:#c4d6e9;font-size:12px}
-</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
+</style><style id="clubs34">.club-result-head34{display:flex;align-items:center;gap:13px}.club-result-head34 .crest15{flex-shrink:0}.club-result34{padding:16px 0}.club-result34 p{margin:3px 0 0}#club-search34{width:100%;font-size:16px}#club-results34{min-height:100px}</style><style id="suspension37">.suspension-alert37{border-left:4px solid #e27767}.suspended-player37{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(140,140,140,.2)}.available37{font-weight:600;color:#4eaf7a}</style></head><body><header><div class="brand"><div class="brandmark">⚽</div><div><h1>Central de Futebol</h1><small>Seu universo. Seus campeonatos.</small></div><span class="version">v1.8</span></div></header><div id="update-banner" class="update-banner hide">Nova versão disponível <button onclick="applyUpdate()">Atualizar</button></div><nav id="nav"></nav><main id="app"></main><div id="bottom-nav" class="bottom-nav" aria-label="Navegação principal"></div><script>
 const KEY='central-futebol-v1';let db;const empty=()=>({teams:[],players:[],competitions:[],matches:[]});try{db=JSON.parse(localStorage.getItem(KEY))||empty()}catch{db=empty()}for(const k of Object.keys(empty()))db[k]??=[];let tab='inicio',edit={},selectedMatch='',selectedCompetition='';const id=()=>crypto.randomUUID?.()||String(Date.now()+Math.random());const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const name=(type,i)=>db[type].find(x=>x.id===i)?.name||'Não encontrado';const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Exporte um backup.')}};const $=x=>document.getElementById(x);const options=(type,val='',filter=()=>true)=>`<option value="">Selecione</option>`+db[type].filter(filter).map(x=>`<option value="${esc(x.id)}" ${x.id===val?'selected':''}>${esc(x.name)}</option>`).join('');const field=(label,key,value='',type='text',extra='')=>`<label>${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;const select=(label,key,type,value='',filter)=>`<label>${label}<select name="${key}">${options(type,value,filter)}</select></label>`;const buttons=(type,x)=>`<button onclick="startEdit('${type}','${x.id}')">Editar</button> <button class="danger" onclick="removeItem('${type}','${x.id}')">Excluir</button>`;
 const tabs=[['inicio','🏠 Início'],['teams','🛡️ Clubes'],['players','👤 Jogadores'],['competitions','🏆 Campeonatos'],['rounds','🗓️ Rodadas'],['matches','⚽ Partidas'],['stats','📊 Estatísticas'],['backup','💾 Backup']];function go(t){tab=t;edit={};render()}function startEdit(t,i){tab=t;edit[t]=db[t].find(x=>x.id===i);render();window.scrollTo(0,0)}function removeItem(t,i){if(!confirm('Excluir este registro? Referências em outros registros podem ficar sem vínculo.'))return;db[t]=db[t].filter(x=>x.id!==i);save();render()}function formSubmit(e,t){e.preventDefault();const o=Object.fromEntries(new FormData(e.target));const old=edit[t];if(t==='matches'&&(!o.homeId||!o.awayId||o.homeId===o.awayId))return alert('Escolha dois clubes diferentes.');if(old)Object.assign(old,o);else db[t].push({...o,id:id(),...(t==='matches'?{events:[]}: {})});edit={};save();render()}
 function render(){ $('nav').innerHTML=tabs.map(([k,v])=>`<button class="${tab===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('');$('app').innerHTML=({inicio:home,teams:teams,players:players,competitions:competitions,rounds:rounds,matches:matches,stats:stats,backup:backup,profile21:profilePage21})[tab]();}
@@ -1230,6 +1230,114 @@ matches=function(){
  ${chosen?`<div class="panel"><h2>${esc(chosen.name)}${chosen.season?' · '+esc(chosen.season):''}</h2><p class="muted">${chosen.matches.length} partidas nesta competição</p>${cards||'<p class="muted">Nenhuma partida cadastrada nesta competição.</p>'}</div>`:''}`;
 };
 document.querySelector('header .version').textContent='v3.6';
+render();
+
+
+/* v3.7: aviso explícito de suspensos na escalação de cada partida. */
+function suspendedPlayers37(m,tid){
+ if(!m?.competitionId)return [];
+ return db.players.filter(p=>p.teamId===tid&&discState30(p,m.competitionId).blocked);
+}
+function suspensionAlert37(m,tid){
+ const team=db.teams.find(t=>t.id===tid);
+ const suspended=suspendedPlayers37(m,tid);
+ const label=esc(team?.name||'Clube');
+ return `<div class="panel suspension-alert37"><h3>🚫 Suspensos para este jogo · ${label}</h3>
+ <p class="muted">${esc(name('competitions',m.competitionId))} · ${esc(m.date||'Data a definir')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))}</p>
+ ${suspended.length?`<p><strong>${suspended.length} ${suspended.length===1?'jogador indisponível':'jogadores indisponíveis'}</strong> nesta partida:</p>
+ ${suspended.map(p=>`<div class="suspended-player37"><strong>🟥 ${esc(p.name)}</strong><span>${discBadge30(p,m.competitionId)}</span></div>`).join('')}
+ <p class="muted">Esses jogadores não podem ser escalados enquanto cumprirem a suspensão nesta competição.</p>`:
+ '<p class="available37">✅ Nenhum jogador suspenso para esta partida.</p>'}</div>`;
+}
+const lineupBefore37=lineupPage17;
+lineupPage17=function(){
+ const html=lineupBefore37();
+ const m=db.matches.find(x=>x.id===lineupMatch17&&(x.homeId===lineupTeam17||x.awayId===lineupTeam17));
+ if(!m)return html;
+ return suspensionAlert37(m,lineupTeam17)+html;
+};
+const reportBefore37=report;
+report=function(){
+ const html=reportBefore37();
+ const m=db.matches.find(x=>x.id===selectedMatch);
+ if(!m||!m.competitionId)return html;
+ return html+`<div class="panel"><h2>📋 Disponibilidade para a escalação</h2><p class="muted">Suspensões específicas desta partida e competição.</p></div>`+
+ suspensionAlert37(m,m.homeId)+suspensionAlert37(m,m.awayId);
+};
+document.querySelector('header .version').textContent='v3.7';
+render();
+
+
+/* v3.8: início da suspensão configurável por partida/rodada. */
+function teamSchedule38(p,cid){
+ return db.matches.filter(m=>m.competitionId===cid&&(m.homeId===p.teamId||m.awayId===p.teamId))
+ .sort((a,b)=>{const ar=Number(a.round),br=Number(b.round);if(Number.isFinite(ar)&&Number.isFinite(br)&&ar!==br)return ar-br;return String(a.date||'').localeCompare(String(b.date||''))||String(a.id).localeCompare(String(b.id))});
+}
+function startMatch38(p,cid,rec){
+ const games=teamSchedule38(p,cid);
+ if(!rec)return null;
+ if(rec.startMatchId38)return games.find(m=>m.id===rec.startMatchId38)||null;
+ const source=games.find(m=>(m.events||[]).some(e=>e.playerId===p.id&&e.type==='red'));
+ if(source){const i=games.indexOf(source);return games[i+1]||null;}
+ return games.find(m=>m.status!=='finished')||null;
+}
+function suspensionView38(p,cid,matchId){
+ const d=suspensionRecord35(p,cid),rec=d.suspension35;
+ if(!rec)return suspensionStatus35(p,cid);
+ const games=teamSchedule38(p,cid),start=startMatch38(p,cid,rec);
+ if(!start)return {...suspensionStatus35(p,cid),blocked:false,pending:true,remaining:rec.total||1};
+ const idx=games.findIndex(m=>m.id===start.id),target=matchId?games.findIndex(m=>m.id===matchId):-1;
+ const before=new Set(rec.finishedAtStart||[]);
+ const counted=games.slice(idx,target>=0?target:undefined).filter(m=>m.status==='finished'&&!before.has(m.id)).length;
+ const remaining=Math.max(0,statInt14(rec.total)-counted);
+ if(target>=0&&target<idx)return {blocked:false,remaining:statInt14(rec.total),total:statInt14(rec.total),pending:true,reason:rec.reason};
+ return {blocked:remaining>0,remaining,total:statInt14(rec.total),reason:rec.reason,pending:false};
+}
+function setSuspension38(ev,pid,cid){
+ ev.preventDefault();const p=db.players.find(x=>x.id===pid);if(!p||!discComp30(cid))return;
+ const f=new FormData(ev.target),n=Number(f.get('games')),startId=String(f.get('startMatch')||'');
+ if(!Number.isInteger(n)||n<1||n>30)return alert('Informe entre 1 e 30 partidas.');
+ if(startId&&!teamSchedule38(p,cid).some(m=>m.id===startId))return alert('Escolha uma partida válida do clube nesta competição.');
+ const d=suspensionRecord35(p,cid);d.manualBlock=true;
+ d.suspension35={total:n,reason:'Suspensão definida manualmente',finishedAtStart:[],teamId:p.teamId,startMatchId38:startId};
+ save();render();
+}
+function suspensionEditor38(p,cid){
+ const games=teamSchedule38(p,cid),rec=p.discipline30?.[cid]?.suspension35;
+ const start=startMatch38(p,cid,rec),view=suspensionView38(p,cid);
+ return `<div class="item"><b>${esc(p.name)}</b> · ${esc(name('teams',p.teamId))}<div>${view.blocked?`🚫 ${view.remaining} jogo(s) restantes`:(view.pending?'🗓️ Suspensão programada':'✅ Disponível')}</div>
+ <form onsubmit="setSuspension38(event,'${p.id}','${cid}')">
+ <label>Jogos de suspensão<input name="games" type="number" min="1" max="30" value="${statInt14(rec?.total)||1}" required></label>
+ <label>Começar a cumprir a partir da partida<select name="startMatch">
+ <option value="">Automático (próximo jogo ou após expulsão)</option>
+ ${games.map(m=>`<option value="${esc(m.id)}" ${rec?.startMatchId38===m.id?'selected':''}>Rodada ${esc(m.round||'?')} · ${esc(m.date||'Sem data')} · ${esc(name('teams',m.homeId))} × ${esc(name('teams',m.awayId))}</option>`).join('')}
+ </select></label><button class="primary">💾 Salvar suspensão e início</button></form>
+ ${start?`<p class="muted">Início previsto: rodada ${esc(start.round||'?')} · ${esc(start.date||'Sem data')}</p>`:'<p class="muted">Cadastre a próxima partida para determinar o início.</p>'}</div>`;
+}
+const disciplineBefore38=disciplinePanel19;
+disciplinePanel19=function(){
+ const html=disciplineBefore38(),cid=disciplineCompetition30;
+ if(!discComp30(cid))return html;
+ const players=db.players.filter(p=>!cardSearch31||p.name.toLocaleLowerCase().includes(cardSearch31.toLocaleLowerCase()));
+ return html+`<div class="panel"><h2>🗓️ Escolher rodada de início da suspensão</h2><p class="muted">Exemplo: expulso na rodada 2, selecione o jogo da rodada 3. Apenas partidas finalizadas a partir do início escolhido descontam a suspensão.</p>${players.map(p=>suspensionEditor38(p,cid)).join('')}</div>`;
+};
+const profileBefore38=playerStatsPage14;
+playerStatsPage14=function(){
+ const html=profileBefore38(),p=db.players.find(x=>x.id===selectedPlayer14);
+ const cid=discComp30(profileDisciplineCompetition32)?.id||db.competitions[0]?.id;
+ return p&&cid?html+`<div class="panel"><h3>🗓️ Escolher início da suspensão</h3>${suspensionEditor38(p,cid)}</div>`:html;
+};
+function suspendedPlayers37(m,tid){
+ if(!m?.competitionId)return [];
+ return db.players.filter(p=>p.teamId===tid&&suspensionView38(p,m.competitionId,m.id).blocked);
+}
+function suspensionAlert37(m,tid){
+ const suspended=suspendedPlayers37(m,tid);
+ return `<div class="panel suspension-alert37"><h3>🚫 Suspensos neste jogo · ${esc(name('teams',tid))}</h3>
+ <p class="muted">${esc(name('competitions',m.competitionId))} · Rodada ${esc(m.round||'?')}</p>
+ ${suspended.length?suspended.map(p=>`<div class="suspended-player37"><b>🟥 ${esc(p.name)}</b><span>${suspensionView38(p,m.competitionId,m.id).remaining} jogo(s) restantes</span></div>`).join(''):'<p class="available37">✅ Nenhum suspenso nesta partida.</p>'}</div>`;
+}
+document.querySelector('header .version').textContent='v3.8';
 render();
 
 </script></body></html>
